@@ -1,0 +1,3 @@
+#include "resource.h"
+IDI_D5RENDER ICON "d5render.ico"
+1 RT_MANIFEST "app.manifest"

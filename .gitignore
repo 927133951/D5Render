@@ -1,0 +1,46 @@
+# 构建产物
+build/
+out/
+x64/
+Debug/
+Release/
+*.obj
+*.pdb
+*.ilk
+*.exe
+*.lib
+*.exp
+*.iobj
+*.ipdb
+
+# 第三方SDK与模型（本地部署，不入库）
+onnxruntime_gpu/
+onnxruntime_dml/
+directml_sdk/
+openvino_sdk/
+cudnn-windows-x86_64-9.24.0.43_cuda13-archive/
+*.zip
+*.onnx
+*.trt
+*.trt*
+*.engine
+
+# 备份与日志
+*.bak*
+*.log
+backups/
+snapshots/
+.screenshots/
+crash.dmp
+
+# 用户本地配置
+*.ini
+
+# Python缓存
+__pycache__/
+*.pyc
+
+# IDE
+.vs/
+.vscode/
+*.user

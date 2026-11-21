@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D5 Render - 使用说明书</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+--bg-primary:#1a0a14;--bg-secondary:#231020;--bg-sidebar:#1e0c18;
+--bg-card:#2d1528;--bg-hover:#3a1d34;--bg-code:#150810;
+--pink-hot:#ff3c8e;--pink-soft:#e8548e;--pink-dim:#a04466;
+--pink-glow:#ff6fa8;--pink-muted:#7a3550;
+--text-main:#f0d0e0;--text-bright:#ffe0ef;--text-dim:#9a7088;
+--text-heading:#ffc0d8;--text-bold:#ffffff;
+--border-color:#3a1d34;--border-light:#5a2d4a;
+--accent-blue:#5ca0ff;--accent-green:#4cff96;--accent-orange:#ffaa40;
+--accent-red:#ff4c4c;--accent-purple:#b070ff;
+--scrollbar-bg:#1e0c18;--scrollbar-thumb:#4a2040;
+}
+html{scroll-behavior:smooth;}
+body{
+font-family:'Microsoft YaHei','Segoe UI',sans-serif;
+background:var(--bg-primary);color:var(--text-main);
+line-height:1.8;display:flex;min-height:100vh;
+}
+::-webkit-scrollbar{width:6px;height:6px;}
+::-webkit-scrollbar-track{background:var(--scrollbar-bg);}
+::-webkit-scrollbar-thumb{background:var(--scrollbar-thumb);border-radius:3px;}
+::-webkit-scrollbar-thumb:hover{background:var(--pink-dim);}
+.sidebar{
+width:280px;min-width:280px;height:100vh;position:sticky;top:0;
+background:var(--bg-sidebar);border-right:1px solid var(--border-color);
+overflow-y:auto;z-index:100;display:flex;flex-direction:column;
+}
+.sidebar-header{
+padding:24px 20px 16px;border-bottom:1px solid var(--border-color);
+background:linear-gradient(135deg,#2a1025 0%,#1a0a14 100%);
+}
+.sidebar-logo{
+font-size:22px;font-weight:800;
+background:linear-gradient(135deg,var(--pink-hot),var(--pink-glow));
+-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+letter-spacing:2px;
+}
+.sidebar-version{font-size:12px;color:var(--text-dim);margin-top:4px;letter-spacing:1px;}
+.sidebar-nav{flex:1;padding:12px 0;}
+.nav-section{padding:0 12px;margin-bottom:4px;}
+.nav-section-title{
+font-size:11px;font-weight:700;color:var(--pink-dim);
+text-transform:uppercase;letter-spacing:2px;
+padding:10px 12px 4px;user-select:none;
+}
+.nav-item{
+display:block;padding:8px 16px;color:var(--text-main);
+text-decoration:none;font-size:13.5px;border-radius:6px;
+margin:1px 4px;transition:all .2s;cursor:pointer;
+border-left:3px solid transparent;position:relative;
+}
+.nav-item:hover{
+background:var(--bg-hover);color:var(--text-bright);
+border-left-color:var(--pink-dim);
+}
+.nav-item.active{
+background:var(--bg-card);color:var(--pink-glow);
+border-left-color:var(--pink-hot);font-weight:600;
+}
+.nav-item.active::before{
+content:'';position:absolute;left:-1px;top:50%;transform:translateY(-50%);
+width:3px;height:60%;background:var(--pink-hot);border-radius:2px;
+}
+.nav-sub{padding-left:20px;}
+.nav-sub .nav-item{font-size:12.5px;padding:6px 14px;}
+.nav-bottom{
+padding:16px 20px;border-top:1px solid var(--border-color);
+background:var(--bg-sidebar);
+}
+.nav-bottom-text{font-size:11px;color:var(--pink-dim);line-height:1.6;}
+.main{flex:1;max-width:900px;margin:0 auto;padding:40px 48px 80px;}
+.doc-title{
+font-size:38px;font-weight:900;
+background:linear-gradient(135deg,var(--pink-hot),var(--pink-glow),var(--accent-purple));
+-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+margin-bottom:8px;letter-spacing:1px;
+}
+.doc-subtitle{font-size:15px;color:var(--text-dim);margin-bottom:40px;}
+h1{
+font-size:28px;font-weight:800;color:var(--text-heading);
+margin:48px 0 20px;padding-bottom:10px;
+border-bottom:2px solid var(--border-color);
+position:relative;
+}
+h1::after{
+content:'';position:absolute;bottom:-2px;left:0;
+width:60px;height:2px;background:var(--pink-hot);border-radius:1px;
+}
+h2{
+font-size:20px;font-weight:700;color:var(--pink-soft);
+margin:32px 0 14px;
+}
+h3{
+font-size:16px;font-weight:600;color:var(--text-heading);
+margin:24px 0 10px;
+}
+h4{
+font-size:14.5px;font-weight:600;color:var(--accent-purple);
+margin:18px 0 8px;
+}
+p{margin-bottom:12px;color:var(--text-main);}
+strong,b{color:var(--text-bold);font-weight:700;}
+.key{color:var(--pink-hot);font-weight:700;}
+.highlight{
+color:var(--pink-glow);font-weight:700;
+background:rgba(255,60,142,0.1);padding:1px 6px;border-radius:3px;
+}
+.tag{
+display:inline-block;padding:1px 8px;border-radius:4px;font-size:12px;
+font-weight:600;vertical-align:middle;margin:0 2px;
+}
+.tag-green{background:rgba(76,255,150,0.15);color:var(--accent-green);}
+.tag-red{background:rgba(255,76,76,0.15);color:var(--accent-red);}
+.tag-orange{background:rgba(255,170,64,0.15);color:var(--accent-orange);}
+.tag-blue{background:rgba(92,160,255,0.15);color:var(--accent-blue);}
+.tag-pink{background:rgba(255,60,142,0.15);color:var(--pink-hot);}
+code{
+background:var(--bg-code);color:var(--pink-glow);
+padding:2px 7px;border-radius:4px;font-size:13px;
+font-family:'Cascadia Code','Consolas',monospace;
+border:1px solid var(--border-color);
+}
+pre{
+background:var(--bg-code);border:1px solid var(--border-color);
+border-radius:8px;padding:16px 20px;margin:12px 0 16px;
+overflow-x:auto;
+}
+pre code{background:none;border:none;padding:0;color:var(--text-main);}
+table{
+width:100%;border-collapse:separate;border-spacing:0;
+margin:12px 0 20px;border-radius:8px;overflow:hidden;
+border:1px solid var(--border-color);
+}
+th{
+background:var(--bg-card);color:var(--text-heading);
+font-weight:700;text-align:left;padding:10px 14px;
+border-bottom:2px solid var(--pink-dim);font-size:13px;
+}
+td{
+padding:9px 14px;border-bottom:1px solid var(--border-color);
+font-size:13.5px;
+}
+tr:hover td{background:rgba(255,60,142,0.03);}
+tr:last-child td{border-bottom:none;}
+.tip{
+border-radius:8px;padding:14px 18px;margin:14px 0 18px;
+border-left:4px solid;position:relative;
+}
+.tip-info{background:rgba(92,160,255,0.08);border-color:var(--accent-blue);}
+.tip-warn{background:rgba(255,170,64,0.08);border-color:var(--accent-orange);}
+.tip-danger{background:rgba(255,76,76,0.08);border-color:var(--accent-red);}
+.tip-success{background:rgba(76,255,150,0.08);border-color:var(--accent-green);}
+.tip-pink{background:rgba(255,60,142,0.08);border-color:var(--pink-hot);}
+.tip-label{
+font-weight:700;font-size:12px;letter-spacing:1px;
+margin-bottom:4px;display:block;
+}
+.tip-info .tip-label{color:var(--accent-blue);}
+.tip-warn .tip-label{color:var(--accent-orange);}
+.tip-danger .tip-label{color:var(--accent-red);}
+.tip-success .tip-label{color:var(--accent-green);}
+.tip-pink .tip-label{color:var(--pink-hot);}
+ul,ol{margin:8px 0 14px 20px;}
+li{margin-bottom:5px;color:var(--text-main);}
+li::marker{color:var(--pink-dim);}
+.card-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0 18px;}
+.card{
+background:var(--bg-card);border:1px solid var(--border-color);
+border-radius:10px;padding:16px;transition:all .2s;
+}
+.card:hover{border-color:var(--pink-dim);background:var(--bg-hover);}
+.card-title{font-weight:700;color:var(--pink-soft);margin-bottom:6px;font-size:14px;}
+.card-desc{font-size:13px;color:var(--text-dim);line-height:1.6;}
+.step-list{counter-reset:step;list-style:none;margin:14px 0 18px;padding:0;}
+.step-item{
+counter-increment:step;position:relative;
+padding:12px 16px 12px 52px;margin-bottom:8px;
+background:var(--bg-card);border:1px solid var(--border-color);
+border-radius:8px;
+}
+.step-item::before{
+content:counter(step);position:absolute;left:12px;top:12px;
+width:28px;height:28px;line-height:28px;text-align:center;
+background:linear-gradient(135deg,var(--pink-hot),var(--pink-glow));
+color:#fff;font-weight:800;font-size:14px;border-radius:50%;
+}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:0;margin:14px 0 18px;border-radius:8px;overflow:hidden;border:1px solid var(--border-color);}
+.compare-col{padding:14px 18px;}
+.compare-col:first-child{border-right:1px solid var(--border-color);}
+.compare-col h4{margin-top:0;}
+hr{border:none;border-top:1px solid var(--border-color);margin:28px 0;}
+.doc-footer{
+margin-top:60px;padding:24px 0;border-top:1px solid var(--border-color);
+font-size:12px;color:var(--text-dim);text-align:center;
+}
+@media(max-width:900px){
+.sidebar{width:220px;min-width:220px;}
+.main{padding:24px 20px 60px;}
+.card-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<nav class="sidebar">
+<div class="sidebar-header">
+<div class="sidebar-logo">D5 RENDER</div>
+<div class="sidebar-version">使用说明书 v2.5</div>
+</div>
+<div class="sidebar-nav">
+<div class="nav-section">
+<div class="nav-section-title">快速开始</div>
+<a class="nav-item active" href="#overview">软件概述</a>
+<a class="nav-item" href="#requirements">系统要求</a>
+<a class="nav-item" href="#install">运行环境准备</a>
+<a class="nav-item" href="#first-run">首次运行</a>
+</div>
+<div class="nav-section">
+<div class="nav-section-title">模型与推理</div>
+<a class="nav-item" href="#model-setup">模型设置</a>
+<a class="nav-item" href="#yolo-versions">YOLO版本识别</a>
+<a class="nav-item" href="#infer-mode">推理模式选择</a>
+<a class="nav-item" href="#trt-precision">TRT精度配置</a>
+<a class="nav-item" href="#gpu-select">显卡选择</a>
+<a class="nav-item" href="#conf-thresh">检测阈值</a>
+</div>
+<div class="nav-section">
+	<div class="nav-section-title">自瞄参数</div>
+	<a class="nav-item" href="#aim-preset">预设模式</a>
+	<a class="nav-item" href="#aim-target">目标选择策略</a>
+	<a class="nav-item" href="#aim-toggle">自瞄总开关</a>
+	<a class="nav-item" href="#key-settings">按键模式</a>
+	<a class="nav-item" href="#multi-key">多按键管理</a>
+	<a class="nav-item" href="#aim-smooth">PD控制与移动</a>
+	<a class="nav-item" href="#per-class-aim">按类别瞄准位置</a>
+	<a class="nav-item" href="#fov-settings">FOV视野范围</a>
+	<a class="nav-item" href="#deadzone">死区设置</a>
+	<a class="nav-item" href="#auto-trigger">自动扳机</a>
+	<a class="nav-item" href="#quickscope">对狙设置</a>
+	</div>
+<div class="nav-section">
+<div class="nav-section-title">高级优化</div>
+<a class="nav-item" href="#scene-adapt">场景自适应</a>
+<a class="nav-item" href="#target-track">目标追踪</a>
+<a class="nav-item" href="#kalman-filter">卡尔曼滤波</a>
+<a class="nav-item" href="#class-filter">类别筛选</a>
+</div>
+<div class="nav-section">
+<div class="nav-section-title">捕获与驱动</div>
+<a class="nav-item" href="#capture-mode">捕获方式</a>
+<a class="nav-item" href="#preview">预览窗口</a>
+<a class="nav-item" href="#driver-mode">鼠标驱动</a>
+<a class="nav-item" href="#makcu-setup">Makcu连接</a>
+</div>
+<div class="nav-section">
+<div class="nav-section-title">性能与安全</div>
+<a class="nav-item" href="#perf-monitor">性能监控</a>
+<a class="nav-item" href="#fps-lock">帧率控制</a>
+<a class="nav-item" href="#anti-capture">防截图</a>
+<a class="nav-item" href="#auto-update">自动更新</a>
+<a class="nav-item" href="#hotkey">快捷键</a>
+</div>
+<div class="nav-section">
+<div class="nav-section-title">配置与其他</div>
+<a class="nav-item" href="#config-mgmt">配置管理</a>
+<a class="nav-item" href="#custom-preset">自定义预设</a>
+<a class="nav-item" href="#faq">常见问题</a>
+<a class="nav-item" href="#param-reference">参数对照表</a>
+<a class="nav-item" href="#changelog">版本更新记录</a>
+</div>
+</div>
+<div class="sidebar-bottom">
+<div class="nav-bottom-text">
+D5 Render 视觉辅助软件<br>
+仅限技术研究与单机娱乐用途<br>
+严禁用于违反服务条款的在线活动
+</div>
+</div>
+</nav>
+
+<div class="main">
+<div class="doc-title">D5 Render 使用说明书</div>
+<div class="doc-subtitle">视觉辅助软件 &middot; 完整参数详解 &middot; 从入门到精通 &middot; v1.0.7</div>
+
+<h1 id="overview">软件概述</h1>
+<p>D5 Render 是一款基于 <strong>YOLO 目标检测模型</strong>的视觉辅助软件，采用 <strong>C++</strong> 原生开发，结合 <strong>TensorRT / DirectML</strong> 推理加速和 <strong>CUDA</strong> GPU并行计算，实现超低延迟的实时目标检测与辅助。</p>
+
+<div class="card-grid">
+<div class="card">
+<div class="card-title">双推理引擎</div>
+<div class="card-desc">支持 <strong>TensorRT</strong>(NVIDIA专属极速)和 <strong>DirectML</strong>(通用GPU兼容)双引擎切换，适配不同硬件环境</div>
+</div>
+<div class="card">
+<div class="card-title">CUDA零拷贝</div>
+<div class="card-desc">CUDA-D3D11互操作实现屏幕捕获到推理的 <strong>零CPU拷贝</strong>路径，延迟降低1-2ms</div>
+</div>
+<div class="card">
+<div class="card-title">PD控制瞄准</div>
+<div class="card-desc"><strong>PD控制器</strong> + 惯性平滑 + 最小移动速度 + 零过冲硬钳位，参数精简直观，新手即调即用</div>
+</div>
+<div class="card">
+<div class="card-title">多重鼠标驱动</div>
+<div class="card-desc">支持 <strong>罗技专用驱动</strong>、<strong>Makcu硬件盒子</strong>、<strong>通用驱动</strong>三种鼠标驱动方式</div>
+</div>
+</div>
+
+<h2 id="requirements">系统要求</h2>
+<table>
+<tr><th>项目</th><th>最低要求</th><th>推荐配置</th></tr>
+<tr><td><strong>操作系统</strong></td><td>Windows 10 2004+</td><td>Windows 11 23H2+</td></tr>
+<tr><td><strong>显卡</strong></td><td>NVIDIA GTX 1060 6GB</td><td>NVIDIA RTX 3060+ / RTX 4060+</td></tr>
+<tr><td><strong>显存</strong></td><td>6GB</td><td>8GB+ (FP32需12GB+)</td></tr>
+<tr><td><strong>CUDA</strong></td><td>CUDA 12.x</td><td>CUDA 13.0</td></tr>
+<tr><td><strong>TensorRT</strong></td><td>TensorRT 10.x</td><td>TensorRT 10.x (最新)</td></tr>
+<tr><td><strong>DirectX</strong></td><td>DirectX 11</td><td>DirectX 12</td></tr>
+<tr><td><strong>内存</strong></td><td>8GB</td><td>16GB+</td></tr>
+</table>
+<div class="tip tip-warn">
+<span class="tip-label">重要</span>
+必须以 <strong>管理员权限</strong>运行软件，否则鼠标驱动在游戏中无法正常工作。右键程序 → <strong>以管理员身份运行</strong>。
+</div>
+
+<h2 id="install">运行环境准备</h2>
+<ol class="step-list">
+<li class="step-item">安装 <strong>NVIDIA 显卡驱动</strong>（最新版），确保显卡支持 CUDA</li>
+<li class="step-item">将程序完整文件夹解压到任意目录，所有必需 DLL 已自带，<strong>无需单独安装 CUDA Toolkit、TensorRT、ONNX Runtime 等</strong></li>
+<li class="step-item">检查程序目录下 DLL 是否齐全：<code>cudart64_*.dll</code>、<code>cublas64_*.dll</code>、<code>cudnn64_9.dll</code>、<code>nvinfer*.dll</code>、<code>onnxruntime.dll</code>、<code>DirectML.dll</code> 等</li>
+<li class="step-item">如需Makcu盒子，安装 <strong>CH343串口驱动</strong> 并连接Makcu硬件</li>
+<li class="step-item">准备一个 <strong>YOLO ONNX 模型文件</strong>（支持 V5~V26 各版本），放入程序目录</li>
+</ol>
+<div class="tip tip-info">
+<span class="tip-label">提示</span>
+本程序已整合所有运行时依赖（含cuDNN），<strong>只需复制整个 bin 文件夹即可使用</strong>。所有 DLL 均与 exe 位于同一目录。
+</div>
+<div class="tip tip-success">
+<span class="tip-label">罗技用户</span>
+<code>logitech.driver.dll</code> 和 <code>ghub_device.dll</code> 已包含在程序目录中。如不可用，请安装罗技G HUB软件，程序运行时会自动搜索并加载。
+</div>
+
+<h2 id="first-run">首次运行</h2>
+<ol class="step-list">
+<li class="step-item">以 <strong>管理员权限</strong> 启动 <code>D5Render.exe</code></li>
+<li class="step-item">点击 <strong>「选择模型」</strong> 按钮，浏览并选择你的 YOLO ONNX 模型文件</li>
+<li class="step-item">确认模型版本被自动识别（右上角显示绿色版本标签）</li>
+<li class="step-item">根据硬件选择 <strong>推理模式</strong>（TensorRT 或 DirectML）</li>
+<li class="step-item">点击 <strong>「加载模型」</strong>，等待模型加载完成（首次加载TensorRT引擎需几分钟构建）</li>
+<li class="step-item">设置 <strong>按键</strong>（默认为鼠标侧键X1），按住按键即可激活</li>
+<li class="step-item">按 <code>Home</code> 键可快速隐藏/显示程序窗口</li>
+</ol>
+
+<h1 id="model-setup">模型设置</h1>
+<p>D5 Render 使用 <strong>YOLO系列目标检测模型</strong>，仅支持 <code>.onnx</code> 格式。模型的选择直接决定检测效果，请确保模型训练场景与实际使用场景匹配。</p>
+
+<h2 id="yolo-versions">YOLO版本识别</h2>
+<p>软件支持从 <strong>YOLOv5</strong> 到 <strong>YOLOv26</strong> 共8个版本的模型：</p>
+<table>
+<tr><th>版本</th><th>输出特征</th><th>自动识别</th></tr>
+<tr><td><span class="tag tag-green">V5</span></td><td>基于锚框 (3个预设框)</td><td>根据输出维度d1==3识别</td></tr>
+<tr><td><span class="tag tag-green">V6</span></td><td>无锚框</td><td>需手动指定</td></tr>
+<tr><td><span class="tag tag-green">V7</span></td><td>基于锚框</td><td>根据输出维度识别</td></tr>
+<tr><td><span class="tag tag-blue">V8</span></td><td>无锚框 (默认)</td><td>默认版本</td></tr>
+<tr><td><span class="tag tag-blue">V9</span></td><td>无锚框</td><td>需手动指定</td></tr>
+<tr><td><span class="tag tag-orange">V10</span></td><td>端到端 (无需NMS)</td><td>根据输出维度识别</td></tr>
+<tr><td><span class="tag tag-orange">V11</span></td><td>无锚框</td><td>需手动指定</td></tr>
+<tr><td><span class="tag tag-pink">V26</span></td><td>端到端</td><td>根据端到端输出推断</td></tr>
+</table>
+<div class="tip tip-pink">
+<span class="tip-label">关键</span>
+版本 <strong>自动识别</strong> 标志：<span style="color:var(--accent-green)">绿色</span> = 识别成功，<span style="color:var(--accent-orange)">黄色</span> = 未识别（使用默认V8）。如检测结果不准，请手动切换版本。
+</div>
+
+<h2 id="infer-mode">推理模式选择</h2>
+<div class="compare">
+<div class="compare-col">
+<h4 style="color:var(--accent-green)">TensorRT (推荐)</h4>
+<p><strong>优势</strong>：速度最快，延迟最低<br>
+<strong>支持</strong>：零拷贝（CUDA-D3D11互操作） + CUDA Graph优化<br>
+<strong>精度</strong>：FP16半精度/FP32全精度可选，混合精度优化<br>
+<strong>要求</strong>：NVIDIA专用，需安装CUDA+TensorRT</p>
+</div>
+<div class="compare-col">
+<h4 style="color:var(--accent-blue)">DirectML (兼容)</h4>
+<p><strong>优势</strong>：通用GPU加速，兼容AMD/Intel<br>
+<strong>支持</strong>：通过TensorRT EP实现GPU加速<br>
+<strong>精度</strong>：FP16半精度，引擎缓存加速<br>
+<strong>要求</strong>：NVIDIA显卡(需cuDNN)或兼容DirectML的GPU</p>
+</div>
+</div>
+<div class="tip tip-success">
+<span class="tip-label">推荐</span>
+有 NVIDIA 显卡 → 选 <strong>TensorRT</strong>；无法使用TensorRT → 选 <strong>DirectML</strong>。DirectML模式也使用TensorRT EP加速，需要cuDNN DLL支持。
+</div>
+
+<h2 id="trt-precision">TRT精度配置</h2>
+<p>TensorRT 模式下提供两种精度选择：</p>
+<table>
+<tr><th>精度</th><th>速度</th><th>精度</th><th>显存</th><th>适用场景</th></tr>
+<tr><td><strong>FP16 半精度</strong></td><td>最快</td><td>可能轻微抖动</td><td>减半</td><td>日常使用，推荐首选</td></tr>
+<tr><td><strong>FP32 全精度</strong></td><td>稍慢</td><td>最高</td><td>翻倍</td><td>需要极高精度时</td></tr>
+</table>
+<h4>混合精度优化</h4>
+<p>在TRT精度选择 <strong>FP32全精度</strong> 后，可开启 <strong>混合精度优化</strong>，允许部分层使用FP16加速，性能较好的显卡开启后速度接近纯FP16，同时保持FP32精度优势。</p>
+
+<h2 id="gpu-select">显卡选择</h2>
+<p>如果你的系统有 <strong>多张显卡</strong>，可以指定用于推理的显卡：</p>
+<ul>
+<li><code>0</code> = 第一张显卡（默认）</li>
+<li><code>1</code> = 第二张显卡</li>
+</ul>
+<div class="tip tip-warn">
+<span class="tip-label">注意</span>
+切换显卡后需 <strong>重新加载模型</strong>。推理运行中无法切换，请先停止检测。
+</div>
+
+<h2 id="conf-thresh">检测阈值</h2>
+<h3>置信度阈值</h3>
+<p>目标被识别的 <strong>最低可信度</strong>。低于此阈值的目标将被忽略。</p>
+<table>
+<tr><th>范围</th><th>效果</th><th>推荐值</th></tr>
+<tr><td>0.01 ~ 0.20</td><td>识别极多，误判多</td><td><span class="tag tag-red">不推荐</span></td></tr>
+<tr><td><strong>0.25 ~ 0.50</strong></td><td>平衡检测率与准确率</td><td><span class="tag tag-green">推荐</span></td></tr>
+<tr><td>0.50 ~ 1.00</td><td>识别极准，可能漏检</td><td>特殊场景</td></tr>
+</table>
+<h3>NMS阈值（非极大值抑制）</h3>
+<p>控制重叠检测框的去重程度：</p>
+<ul>
+<li><strong>越低</strong> = 重叠框越少（更严格去重）</li>
+<li><strong>越高</strong> = 保留更多重叠框</li>
+<li>推荐默认 <strong>0.45</strong></li>
+</ul>
+
+<h1 id="aim-preset">预设模式</h1>
+<p>软件提供 <strong>预设模式</strong>，一键切换参数组合：</p>
+
+<h3>默认模式 — 稳定锁定</h3>
+<p>采用 <strong>PD控制 + 惯性平滑 + 最小移动速度 + 零过冲钳位</strong> 的精简方案：</p>
+<ul>
+<li>Kp=0.30, Kd=0.15, 死区=5</li>
+<li>速度倍率=1.0, 最大步长=18, 惯性=0.20</li>
+<li>D项仅制动(接近目标时减速)，永不加速</li>
+<li>最小移动速度2px/帧，确保快速锁定不爬行</li>
+<li>移动量硬钳位在误差的90%内，数学保证零过冲</li>
+<li>FOV自动缩放开启，锁定后缩小到0.15</li>
+<li>场景自适应开启，复杂场景自动调整参数</li>
+<li>卡尔曼滤波开启，过程噪声=12，测量噪声=2</li>
+</ul>
+<div style="background:rgba(100,180,255,0.1);border-left:3px solid var(--accent-blue);padding:10px 14px;margin:10px 0;border-radius:4px;">
+<strong>刷新率自适应：</strong>首次启动（无配置文件时），软件会自动检测屏幕刷新率并调整默认参数：
+<ul>
+<li><strong>60~75Hz</strong>：使用上述基准参数（缩放1.0）</li>
+<li><strong>100~120Hz</strong>：Kp/步长/惯性 × 0.85</li>
+<li><strong>144~165Hz</strong>：Kp/步长/惯性 × 0.70</li>
+<li><strong>240Hz+</strong>：Kp/步长/惯性 × 0.60</li>
+</ul>
+已有配置文件时保留用户设置，不受刷新率影响。
+</div>
+
+<h3>自定义模式 — 用户保存</h3>
+<p>点击 <strong>「+」</strong> 按钮可将当前所有参数保存为自定义预设，下次启动仍可使用。</p>
+
+<h1 id="aim-target">目标选择策略</h1>
+<div class="card-grid">
+<div class="card">
+<div class="card-title">距离优先</div>
+<div class="card-desc">选择离准心 <strong>最近</strong> 的目标，锁定后持续跟踪，不会随意切换。适合大多数场景，<strong>默认推荐</strong>。</div>
+</div>
+<div class="card">
+<div class="card-title">大小优先</div>
+<div class="card-desc">选择画面中 <strong>最大</strong> 的目标（通常距离最近），锁定后持续跟踪。适合需要优先处理近距离目标的场景。</div>
+</div>
+</div>
+<div class="tip tip-info">
+<span class="tip-label">锁定机制</span>
+无论哪种策略，<strong>锁定后不会乱切目标</strong>，直到目标消失超过容忍帧数或松开热键才释放锁定。锁定粘性持续约1秒，期间不会跳到其他目标。
+</div>
+
+<h1 id="aim-toggle">自瞄总开关</h1>
+	<p>自瞄总开关是一个 <strong>独立的全局开关</strong>，控制自瞄功能是否生效。启用后，即使按住瞄准键，也只有在总开关为 <strong>ON</strong> 状态时才会锁定目标。</p>
+	
+	<div class="tip tip-pink">
+	<span class="tip-label">核心用途</span>
+	防止局外（大厅、选英雄、结算界面等）误锁目标。左键自瞄用户尤其需要——局外UI元素可能被误识别为目标，导致鼠标异常移动。
+	</div>
+	
+	<h3>启用总开关</h3>
+	<p>勾选 <strong>「启用总开关」</strong> 复选框后，热键切换功能生效。状态指示实时显示：</p>
+	<ul>
+	<li><span style="color:#4cff96">绿色 [ON]</span> = 总开关已开启，按住瞄准键即可锁定</li>
+	<li><span style="color:#ff4c4c">红色 [OFF]</span> = 总开关已关闭，按住瞄准键也不会锁定</li>
+	</ul>
+	
+	<h3>按键模式</h3>
+	<table>
+	<tr><th>模式</th><th>说明</th><th>适用场景</th></tr>
+	<tr><td><strong>单键</strong></td><td>按一个键切换开/关</td><td>简单快捷，局外关一下即可</td></tr>
+	<tr><td><strong>组合键</strong></td><td>需同时按住两个键才切换</td><td>防误触，推荐局内使用</td></tr>
+	</table>
+	
+	<h3>按键选择</h3>
+	<p>主键和组合键均支持 <strong>72个按键</strong>，包括：</p>
+	<ul>
+	<li>鼠标键：左键、中键、右键、侧键1、侧键2</li>
+	<li>修饰键：左/右 Shift、Ctrl、Alt</li>
+	<li>数字键：1~0（大键盘）</li>
+	<li>字母键：A~Z（全26键）</li>
+	<li>特殊键：Tab、CapsLock、Space、Enter、Backspace</li>
+	<li>功能键：F1~F12</li>
+	<li>导航键：Ins、Home、End、PgUp、PgDn、Scroll、PrtSc、Pause</li>
+	</ul>
+	
+	<div class="tip tip-success">
+	<span class="tip-label">推荐配置</span>
+	单键模式：<strong>F10</strong> 或 <strong>F11</strong>（默认）<br>
+	组合键模式：<strong>Ctrl+Q</strong>、<strong>Ctrl+F10</strong> 等（主键+修饰键）
+	</div>
+	
+	<h3>运行逻辑</h3>
+	<ol>
+	<li>总开关 <strong>未启用</strong> → 行为与之前完全一致，按住瞄准键即可激活</li>
+	<li>总开关 <strong>启用+OFF</strong> → 按住瞄准键不会锁定目标</li>
+	<li>总开关 <strong>启用+ON</strong> → 按住瞄准键正常锁定目标</li>
+	<li>每次启动程序，总开关默认为 <strong>OFF</strong>，防止意外激活</li>
+	</ol>
+	
+	<h1 id="key-settings">按键模式</h1>
+<p>控制自瞄激活的按键方式，支持 <strong>单键</strong> 和 <strong>组合键</strong> 两种模式：</p>
+<table>
+<tr><th>模式</th><th>说明</th><th>示例</th></tr>
+<tr><td><strong>单键</strong></td><td>按住一个键即激活</td><td>鼠标侧键X1（默认）</td></tr>
+<tr><td><strong>组合键</strong></td><td>需同时按住两个键</td><td>Alt + 鼠标侧键</td></tr>
+</table>
+<p>按键设置方式：<strong>点击按键按钮</strong> → <strong>按下任意键</strong> → 自动识别绑定。按 <code>Esc</code> 可取消捕获。</p>
+
+<h2 id="multi-key">多按键管理</h2>
+<p>支持最多 <strong>10个按键槽</strong>，任意一个按键槽按下即可激活：</p>
+<ul>
+<li>每个按键槽可独立设置 <strong>单键</strong> 或 <strong>组合键</strong> 模式</li>
+<li>点击 <strong>「+ 添加按键槽」</strong> 将当前按键设置转为第一个槽</li>
+<li>可继续添加更多按键，最多10个</li>
+<li>右键自定义预设按钮可删除预设</li>
+<li>点击 <strong>「清空所有按键」</strong> 恢复单按键模式</li>
+</ul>
+
+<h1 id="aim-smooth">PD控制与移动参数</h1>
+<p>核心算法采用 <strong>PD控制器 + 惯性平滑 + 最小移动速度 + 零过冲钳位</strong>，参数精简、直观易调：</p>
+
+<div class="tip tip-success">
+<span class="tip-label">v1.0.7 防检测增强</span>
+新增 <strong>Home 键窗口显隐切换</strong>（全屏游戏下隐藏/找回配置面板）、<strong>窗口随机化标识</strong>（类名/标题每次启动随机生成，破坏特征匹配）、<strong>移动输出拟人化层</strong>（叠加幅度抖动/弧线侧偏/正弦微扰/高斯噪声，对抗行为统计检测）。
+</div>
+
+<div class="tip tip-success">
+<span class="tip-label">v1.0.6 精简优化</span>
+移除了积分项(Ki)、平滑度、加速曲线、精细距离、抖动随机化等复杂参数，仅保留 <strong>Kp、Kd、死区、速度倍率、最大步长、惯性</strong> 六个核心参数，对新手更友好，调参更直观。
+</div>
+
+<h3>PD参数</h3>
+<p>PD控制器是瞄准算法的核心，决定鼠标移动的响应特性：</p>
+
+<h4>比例增益 Kp</h4>
+<p>控制鼠标移动到目标的 <strong>基础响应速度</strong>：</p>
+<ul>
+<li><strong>0.1 ~ 0.2</strong> = 慢速响应，非常平滑但反应慢</li>
+<li><strong>0.25 ~ 0.35</strong> = 平衡响应，<span class="tag tag-green">推荐</span></li>
+<li><strong>0.35 ~ 0.50</strong> = 快速响应，灵敏但需注意过冲</li>
+<li>默认值 <strong>0.30</strong></li>
+</ul>
+<div class="tip tip-info">
+<span class="tip-label">公式</span>
+<code>移动量 = 误差 × Kp × 速度倍率</code>，Kp越大每帧移动越多。系统硬钳位确保移动量永远不超过误差的90%，因此即使Kp调大也不会过冲。
+</div>
+
+<h4>微分增益 Kd</h4>
+<p>抑制 <strong>过冲和振荡</strong>，接近目标时自动减速制动：</p>
+<ul>
+<li><strong>0</strong> = 无制动，纯比例控制，可能轻微过冲</li>
+<li><strong>0.10 ~ 0.20</strong> = 适度制动，<span class="tag tag-green">推荐</span></li>
+<li><strong>0.20 ~ 0.50</strong> = 强制动，接近目标时减速明显</li>
+<li>默认值 <strong>0.15</strong></li>
+</ul>
+<div class="tip tip-info">
+<span class="tip-label">D项特性</span>
+D仅在接近目标时制动（误差减小时减速），目标远离时不加速，最多削减P的50%。即使Kd拉满也不会导致准心反向抖动。
+</div>
+
+<h3>速度倍率</h3>
+<p>所有移动的全局 <strong>速度缩放</strong>：</p>
+<ul>
+<li><strong>0.5</strong> = 半速，非常平滑</li>
+<li><strong>1.0</strong> = 正常速度（默认）</li>
+<li><strong>1.5 ~ 2.0</strong> = 加速，快速锁定</li>
+</ul>
+
+<h3>移动参数</h3>
+<table>
+<tr><th>参数</th><th>默认值</th><th>范围</th><th>说明</th></tr>
+<tr><td><strong>最大步长</strong></td><td>18</td><td>1 ~ 50</td><td>每帧最大移动像素，防止瞬间大跳</td></tr>
+<tr><td><strong>惯性</strong></td><td>0.20</td><td>0 ~ 0.95</td><td>上帧移动的保留比例，越大越平滑</td></tr>
+</table>
+
+<h3>零过冲保障机制</h3>
+<p>v1.0.7 采用多重保障确保 <strong>零过冲</strong>：</p>
+<ul>
+<li><strong>90%硬钳位</strong>：移动量永远不超过剩余误差的90%，数学上不可能越过目标</li>
+<li><strong>最小移动速度2px</strong>：误差小时确保准星不爬行，快速锁定目标</li>
+<li><strong>D制动限制</strong>：D最多削减P的50%，不会反转移动方向</li>
+<li><strong>跳帧零移动</strong>：检测间隔帧不移动，防止累积过冲</li>
+</ul>
+
+<h3>吸附位置Y</h3>
+<p>控制Y轴方向的 <strong>吸附偏移</strong>：</p>
+<ul>
+<li><strong>0</strong> = 头部（适合爆头）</li>
+<li><strong>0.5</strong> = 身体中心（最稳定）</li>
+<li><strong>1</strong> = 脚部（不推荐）</li>
+<li>推荐 <strong>0.0 ~ 0.3</strong></li>
+</ul>
+
+<h3>吸附位置X</h3>
+<p>控制X轴方向的吸附位置：</p>
+<ul>
+<li><strong>0</strong> = 目标左边缘</li>
+<li><strong>0.5</strong> = 目标中心（默认）</li>
+<li><strong>1</strong> = 目标右边缘</li>
+</ul>
+
+<h3 id="per-class-aim">按类别瞄准位置</h3>
+<p>勾选 <strong>"启用按类别独立设置"</strong> 后，可为每个类别单独配置Y轴吸附位置，全局吸附位置Y将自动隐藏。</p>
+<ul>
+<li>仅在 <strong>上方类别筛选</strong> 中勾选的类别才会显示设置滑块</li>
+<li>取消勾选的类别 <strong>不被检测</strong>，但已设置的数值会保留</li>
+<li>每个类别独立设置Y轴位置，互不影响</li>
+</ul>
+<div style="background:rgba(255,180,0,0.1);border-left:3px solid var(--accent-orange);padding:10px 14px;margin:10px 0;border-radius:4px;">
+<strong>使用示例：</strong>
+<ul>
+<li>敌人类别设为 <strong>0.35</strong>（脖子位置）—— 稳定锁定，适合中距离</li>
+<li>小兵类别设为 <strong>0.25</strong>（头部偏上）—— 一枪爆头，节省子弹</li>
+<li>BOSS类别设为 <strong>0.5</strong>（身体中心）—— 稳定输出弱点</li>
+</ul>
+</div>
+
+<h1 id="fov-settings">FOV视野范围</h1>
+<p>自瞄搜索目标的 <strong>圆形视野范围</strong>：</p>
+<ul>
+<li><strong>1.0</strong> = 整个捕获区域</li>
+<li><strong>0.1</strong> = 仅屏幕中心附近</li>
+<li>推荐 <strong>0.30 ~ 0.60</strong></li>
+</ul>
+
+<h3>FOV自动缩放</h3>
+<p>启用后，锁定目标时会 <strong>自动缩小</strong> 检测范围，减少其他目标干扰：</p>
+<table>
+<tr><th>参数</th><th>说明</th><th>推荐值</th></tr>
+<tr><td><strong>锁定FOV</strong></td><td>缩小后的视野范围</td><td>0.10 ~ 0.20</td></tr>
+<tr><td><strong>缩放速度</strong></td><td>FOV缩小的速度</td><td>5.0 ~ 10.0</td></tr>
+<tr><td><strong>还原速度</strong></td><td>目标消失后FOV恢复的速度</td><td>2.0 ~ 5.0</td></tr>
+</table>
+
+<h1 id="deadzone">死区设置</h1>
+<p>准心与目标距离 <strong>小于死区值</strong> 时停止移动，防止锁定后的微调抖动：</p>
+<table>
+<tr><th>死区(像素)</th><th>效果</th><th>适用场景</th></tr>
+<tr><td><strong>0</strong></td><td>完全无死区，始终微调</td><td><span class="tag tag-red">不推荐</span> 会抖动</td></tr>
+<tr><td><strong>3</strong></td><td>小死区，精准锁定</td><td>近距离/高精度需求</td></tr>
+<tr><td><strong>5</strong></td><td>适中死区，锁定稳定且精度足够</td><td><span class="tag tag-green">推荐（默认）</span></td></tr>
+<tr><td><strong>8~10</strong></td><td>大死区，锁定更稳但精度略低</td><td>远距离/高抖动场景</td></tr>
+</table>
+<div class="tip tip-info">
+<span class="tip-label">说明</span>
+死区是在 <strong>误差距离</strong> 上判断的，不是单个轴。死区5px意味着误差距离小于5px时完全停止移动。配合最小移动速度2px/帧，准星能快速收敛到死区内并稳定锁定。
+</div>
+
+<h1 id="auto-trigger">自动扳机</h1>
+	<p>自动扳机功能可在 <strong>准星到达目标时自动按住左键开枪</strong>，适用于全自动武器（步枪、冲锋枪等）的持续射击场景。</p>
+
+	<h3>核心流程</h3>
+	<ol class="step-list">
+	<li class="step-item">按住 <strong>自瞄键</strong> 锁定目标，自瞄系统将准星移向目标</li>
+	<li class="step-item">同时按住 <strong>自动扳机触发键</strong>（如鼠标侧键2）</li>
+	<li class="step-item">准星与目标中心的距离 ≤ 触发阈值时，自动按住左键持续开枪</li>
+	<li class="step-item">准星偏离目标超过阈值时，自动释放左键停止射击</li>
+	</ol>
+
+	<div class="tip tip-pink">
+	<span class="tip-label">关键特性</span>
+	<ul>
+	<li><strong>持续按住</strong>：进入触发区后按住左键不放，游戏自身控制射速，可完整清空弹夹</li>
+	<li><strong>智能释放</strong>：准星偏离目标或松开触发键时立即释放左键</li>
+	<li><strong>受总开关控制</strong>：自瞄总开关必须开启才能使用自动扳机</li>
+	<li><strong>与对狙互斥</strong>：对狙触发时自动扳机暂停</li>
+	</ul>
+	</div>
+
+	<h3>参数说明</h3>
+	<table>
+	<tr><th>参数</th><th>默认值</th><th>范围</th><th>说明</th></tr>
+	<tr><td><strong>启用自动扳机</strong></td><td>关闭</td><td>开/关</td><td>启用自动扳机功能</td></tr>
+	<tr><td><strong>触发键</strong></td><td>无</td><td>72个按键</td><td>按住此键激活自动扳机，推荐鼠标侧键2</td></tr>
+	<tr><td><strong>开枪延迟(ms)</strong></td><td>50</td><td>0 ~ 500</td><td>准星到位后延迟多少毫秒再开枪，模拟人类反应时间</td></tr>
+	<tr><td><strong>触发阈值(px)</strong></td><td>5.0</td><td>0.5 ~ 30.0</td><td>准星距目标中心≤此像素数时判定到位并开枪</td></tr>
+	<tr><td><strong>拟人化随机</strong></td><td>开启</td><td>开/关</td><td>随机化触发阈值和开枪延迟，模拟人类操作</td></tr>
+	</table>
+
+	<div class="tip tip-warn">
+	<span class="tip-label">注意</span>
+	<ul>
+	<li>开枪延迟 <strong>0ms</strong> = 准星到位立即开枪，最快但最容易被检测，推荐 <strong>50ms</strong></li>
+	<li>触发阈值越小 = 要求准星越精准才开枪（5px推荐），越大 = 越容易触发但可能打不中</li>
+	<li>玩家手动按住左键开枪时，自动扳机不会干扰手动操作</li>
+	</ul>
+	</div>
+
+<h1 id="quickscope">对狙设置</h1>
+	<p>对狙功能专为狙击枪设计，实现 <strong>瞬间吸附 + 自动开枪</strong> 的一键秒杀操作。</p>
+
+	<h3>核心流程</h3>
+	<ol class="step-list">
+	<li class="step-item">用户看到目标，右键开镜</li>
+	<li class="step-item">准星接近目标后，按下 <strong>触发键</strong>（如鼠标侧键1）</li>
+	<li class="step-item">软件瞬间将准星吸附到目标头部（80%距离瞬间跳 + 20%自瞄修正）</li>
+	<li class="step-item">延迟指定帧数后自动点击左键开枪</li>
+	</ol>
+
+	<div class="tip tip-pink">
+	<span class="tip-label">关键特性</span>
+	<ul>
+	<li><strong>固定瞄头</strong>：对狙始终锁定目标头部，不受Y轴吸附位置参数影响</li>
+	<li><strong>独立触发</strong>：不需要按住自瞄键，只需按触发键即可执行</li>
+	<li><strong>受总开关控制</strong>：自瞄总开关必须开启才能使用对狙</li>
+	</ul>
+	</div>
+
+	<h3>参数说明</h3>
+	<table>
+	<tr><th>参数</th><th>默认值</th><th>范围</th><th>说明</th></tr>
+	<tr><td><strong>启用对狙</strong></td><td>关闭</td><td>开/关</td><td>启用对狙功能</td></tr>
+	<tr><td><strong>触发键</strong></td><td>鼠标侧键1</td><td>72个按键</td><td>按下此键触发吸附+开枪，推荐鼠标侧键</td></tr>
+	<tr><td><strong>开枪延迟(帧)</strong></td><td>3</td><td>0 ~ 20</td><td>吸附后等待帧数再开枪，0=立即开枪，3≈50ms@60fps（推荐）</td></tr>
+	</table>
+
+	<div class="tip tip-warn">
+	<span class="tip-label">注意</span>
+	开枪延迟设置过小（0~1帧）可能在准星尚未到位时就开枪导致空枪，建议设为 <strong>3帧</strong> 以上。延迟过大则会错失时机。
+	</div>
+
+<h1 id="scene-adapt">场景自适应</h1>
+<p>根据 <strong>场景复杂度</strong> 自动调整算法参数：</p>
+<ul>
+<li><strong>复杂场景</strong>（多目标、遮挡严重）→ 自动降低增益、增强阻尼</li>
+<li><strong>简单场景</strong>（少目标、低干扰）→ 使用正常参数</li>
+</ul>
+<p>场景复杂度指标(0~1)：</p>
+<table>
+<tr><th>范围</th><th>含义</th><th>标签颜色</th></tr>
+<tr><td>&lt; 0.3</td><td>简单场景，少量目标低干扰</td><td><span class="tag tag-green">绿色</span></td></tr>
+<tr><td>0.3 ~ 0.6</td><td>中等复杂，多目标有遮挡</td><td><span class="tag tag-orange">黄色</span></td></tr>
+<tr><td>&gt; 0.6</td><td>复杂场景，大量目标严重遮挡</td><td><span class="tag tag-red">红色</span></td></tr>
+</table>
+
+<h1 id="target-track">目标追踪</h1>
+<p>目标追踪模块确保锁定目标的 <strong>稳定性和持续性</strong>：</p>
+
+<h3>匹配阈值</h3>
+<p>目标重识别的搜索半径（像素）：</p>
+<ul>
+<li><strong>越小</strong> = 仅匹配近距离目标，更精确但易丢失</li>
+<li><strong>越大</strong> = 远距离也能匹配，更宽容但可能误匹配</li>
+<li>推荐 <strong>100 ~ 150</strong></li>
+</ul>
+
+<h3>丢失容忍</h3>
+<p>目标消失后保持追踪的 <strong>帧数</strong>：</p>
+<ul>
+<li><strong>越小</strong> = 快速放弃丢失目标</li>
+<li><strong>越大</strong> = 长时间保持追踪，对短暂遮挡越容忍</li>
+<li>推荐 <strong>15 ~ 25</strong></li>
+</ul>
+
+<h3>切换阻力</h3>
+<p>目标切换的阻力系数，防止锁定目标频繁切换：</p>
+<ul>
+<li><strong>0</strong> = 随时切换到更近目标</li>
+<li><strong>0.5</strong> = 极难切换</li>
+<li>推荐 <strong>0.10 ~ 0.25</strong></li>
+</ul>
+
+<h1 id="kalman-filter">卡尔曼滤波</h1>
+<p>卡尔曼滤波器用于 <strong>预测目标的未来位置</strong>，基于历史运动轨迹推算下一帧位置：</p>
+<table>
+<tr><th>参数</th><th>含义</th><th>推荐值</th></tr>
+<tr><td><strong>过程噪声</strong></td><td>目标运动模型的不确定性</td><td><strong>5 ~ 12</strong></td></tr>
+<tr><td><strong>测量噪声</strong></td><td>检测框位置的不确定性</td><td><strong>2 ~ 8</strong></td></tr>
+<tr><td><strong>预测提前量</strong></td><td>预测目标未来多远的位置(秒)</td><td><strong>0.015 ~ 0.030</strong></td></tr>
+</table>
+
+<h2 id="class-filter">类别筛选</h2>
+<p>加载模型后，如果模型包含多个类别，可以 <strong>选择性启用</strong> 需要检测的类别：</p>
+<ul>
+<li><strong>全选</strong>：勾选所有类别</li>
+<li><strong>全不选</strong>：取消所有类别</li>
+<li><strong>仅人物</strong>：只勾选第一个类别</li>
+<li>也可以单独勾选/取消勾选每个类别</li>
+</ul>
+<div class="tip tip-info">
+<span class="tip-label">提示</span>
+每个模型的类别禁用状态会 <strong>独立记忆</strong>，切换不同模型时自动恢复上次的筛选设置。
+</div>
+
+<h1 id="capture-mode">捕获方式</h1>
+<p>屏幕捕获是推理管线的第一步，支持三种方式：</p>
+<table>
+<tr><th>方式</th><th>隐秘性</th><th>速度</th><th>兼容性</th><th>说明</th></tr>
+<tr><td><span class="tag tag-green">WGC图形捕获(推荐)</span></td><td>高</td><td>中</td><td>Win10 2004+</td><td><strong>推荐首选</strong>，隐秘性高</td></tr>
+<tr><td><span class="tag tag-orange">按需DXGI(Hook)</span></td><td>中</td><td>快</td><td>Win8+</td><td>每帧创建/释放duplication</td></tr>
+<tr><td><span class="tag tag-red">DXGI桌面复制</span></td><td>低</td><td>最快</td><td>Win8+</td><td>速度最快，支持GPU直传</td></tr>
+</table>
+
+<h1 id="preview">预览窗口</h1>
+<p>可开启独立的预览窗口，实时显示捕获画面和检测结果：</p>
+<ul>
+<li>窗口上显示 <strong>FOV圆形范围</strong>（黄色圆圈）</li>
+<li>显示 <strong>十字准心</strong>（红色十字线）</li>
+<li>检测到的目标以 <strong>绿色矩形框</strong> 标注</li>
+<li>窗口可拖拽、缩放，位置和大小自动保存</li>
+</ul>
+
+<h1 id="driver-mode">鼠标驱动</h1>
+<p>控制鼠标移动的驱动方式：</p>
+<table>
+<tr><th>驱动</th><th>精度</th><th>隐秘性</th><th>要求</th></tr>
+	<tr><td><strong>罗技专用驱动</strong></td><td>极高</td><td>高</td><td>需运行罗技G HUB客户端+驱动DLL</td></tr>
+	<tr><td><strong>通用驱动</strong></td><td>中</td><td>低</td><td>无需额外安装</td></tr>
+	<tr><td><strong>Makcu盒子</strong></td><td>极高</td><td>极高</td><td>需Makcu硬件+CH343驱动</td></tr>
+</table>
+
+<h2 id="makcu-setup">Makcu连接配置</h2>
+<h3>串口端口</h3>
+<p>Makcu盒子的COM端口号：<strong>留空自动检测</strong>，或手动指定如 <code>COM3</code>。</p>
+<h3>波特率</h3>
+<table>
+<tr><th>波特率</th><th>说明</th></tr>
+<tr><td><strong>115200</strong></td><td>默认值，兼容性最好</td></tr>
+<tr><td><strong>921600</strong></td><td>高速模式，需固件3.7+</td></tr>
+</table>
+<div class="tip tip-warn">
+<span class="tip-label">故障排查</span>
+Makcu连接失败的常见原因：<br>
+1. 确认Makcu盒子已通过USB连接<br>
+2. 确认已安装CH343串口驱动<br>
+3. 确认设备管理器中显示COM端口<br>
+4. 确认没有其他软件占用该COM端口<br>
+5. 尝试手动指定COM端口号
+</div>
+
+<h3>鼠标移动测试</h3>
+<p>点击 <strong>「鼠标移动测试」</strong> 按钮，程序会自动移动鼠标8个方向，测试驱动是否正常工作。</p>
+
+<h1 id="perf-monitor">性能监控</h1>
+<p>软件内建完善的 <strong>性能监控面板</strong>，实时展示运行状态：</p>
+
+<h3>GPU信息</h3>
+<ul>
+<li><strong>厂商</strong>：<span style="color:var(--accent-green)">NVIDIA</span> / <span style="color:var(--accent-red)">AMD</span> / <span style="color:var(--accent-blue)">Intel</span></li>
+<li><strong>型号</strong>：显卡具体型号</li>
+<li><strong>显存</strong>：显存容量(GB)</li>
+<li><strong>性能等级</strong>：<span class="tag tag-green">高端</span> / <span class="tag tag-orange">中端</span> / <span class="tag tag-red">低端</span></li>
+</ul>
+
+<h3>延迟指标</h3>
+<table>
+<tr><th>指标</th><th>颜色判定</th><th>含义</th></tr>
+<tr><td><strong>总延迟</strong></td><td>&lt;5ms<span class="tag tag-green">优</span> 5~10ms<span class="tag tag-orange">中</span> &gt;10ms<span class="tag tag-red">慢</span></td><td>捕获+预处理+推理+后处理全流程</td></tr>
+<tr><td><strong>GPU延迟</strong></td><td>&lt;3ms<span class="tag tag-green">优</span> 3~6ms<span class="tag tag-orange">中</span> &gt;6ms<span class="tag tag-red">慢</span></td><td>预处理+推理的GPU计算时间</td></tr>
+<tr><td><strong>捕获延迟</strong></td><td>通常&lt;2ms</td><td>屏幕采集耗时</td></tr>
+</table>
+
+<h3>实时参数</h3>
+<ul>
+<li><strong>引擎类型</strong>：TensorRT / DirectML</li>
+<li><strong>零拷贝</strong>：CUDA-D3D11互操作已启用</li>
+<li><strong>CUDA Graph</strong>：TRT推理执行图已预编译</li>
+<li><strong>有效增益</strong>：当前实际生效的移动增益</li>
+<li><strong>视野范围</strong>：当前实际生效的FOV值</li>
+<li><strong>锁定置信度</strong>：目标锁定的可靠程度(0~1)</li>
+<li><strong>场景复杂度</strong>：当前场景的复杂程度</li>
+<li><strong>运行状态</strong>：瞄准中 / 检测中</li>
+</ul>
+
+<h1 id="fps-lock">帧率控制</h1>
+<h3>自动锁帧（推荐）</h3>
+<p>系统 <strong>自动检测GPU性能</strong> 并设定最优帧率：</p>
+<ul>
+<li>性能等级越高 → 锁定帧率越高</li>
+<li>内置校准机制，运行一段时间后自动细调</li>
+<li>状态：<span class="tag tag-green">已校准</span> / <span class="tag tag-orange">校准中</span></li>
+</ul>
+<h3>手动帧率</h3>
+<p>关闭自动锁帧后可手动设置目标FPS：</p>
+<ul>
+<li><strong>0</strong> = 不限制（最大性能）</li>
+<li><strong>20 ~ 144</strong> = 锁定到指定帧率</li>
+</ul>
+
+<h1 id="anti-capture">防截图</h1>
+<p>开启后，<strong>外部截图/录屏软件无法捕获</strong> 本程序窗口内容：</p>
+<ul>
+<li>通过 Windows API <code>SetWindowDisplayAffinity</code> 实现</li>
+<li>保护隐私安全，防止被反作弊截图检测</li>
+<li>同时作用于主窗口和预览窗口</li>
+</ul>
+<div class="tip tip-pink">
+<span class="tip-label">快捷操作</span>
+按 <code>Home</code> 键可快速 <strong>隐藏/显示</strong> 整个程序窗口。
+</div>
+
+<h1 id="auto-update">自动更新</h1>
+	<p>软件启动时会自动检查 <strong>Gitee</strong> 上的最新版本，如果有新版本会弹出更新提示：</p>
+	<ul>
+	<li>弹窗显示 <strong>最新版本号</strong> 和 <strong>更新内容</strong></li>
+	<li>点击 <strong>「打开下载页面」</strong> 跳转到下载网盘</li>
+	<li>点击 <strong>「稍后提醒」</strong> 关闭提示，下次启动仍会检测</li>
+	</ul>
+	<div class="tip tip-info">
+	<span class="tip-label">说明</span>
+	更新检测在后台异步执行，不会影响软件启动速度。如果网络不可用，静默跳过检测。
+	</div>
+
+<h1 id="hotkey">快捷键</h1>
+<table>
+	<tr><th>按键</th><th>功能</th><th>说明</th></tr>
+	<tr><td><code>Home</code></td><td>隐藏/显示程序</td><td>快速应急隐藏，再次按下恢复显示</td></tr>
+	<tr><td><code>Esc</code></td><td>取消按键捕获</td><td>在设置按键时按Esc取消</td></tr>
+	<tr><td>自定义瞄准键</td><td>激活瞄准</td><td>按住即激活，松开即停止</td></tr>
+	<tr><td>总开关热键</td><td>切换自瞄总开关</td><td>按下切换ON/OFF，需先启用总开关功能</td></tr>
+	</table>
+
+<h1 id="config-mgmt">配置管理</h1>
+<ul>
+<li><strong>保存配置</strong>：将当前所有参数保存为 <code>.ini</code> 文件</li>
+<li><strong>加载配置</strong>：从 <code>.ini</code> 文件加载参数</li>
+<li>程序退出时自动保存到默认配置文件</li>
+<li>下次启动自动加载上次的配置</li>
+</ul>
+
+<h1 id="custom-preset">自定义预设</h1>
+<ol class="step-list">
+<li class="step-item">调整好所有参数（Kp、Kd、速度倍率、FOV等）</li>
+<li class="step-item">点击预设区域的 <strong>「+」</strong> 按钮保存当前参数</li>
+<li class="step-item">为预设命名（自动编号）</li>
+<li class="step-item">下次直接点击预设按钮即可一键恢复参数</li>
+</ol>
+<div class="tip tip-info">
+<span class="tip-label">操作</span>
+左键点击预设 = 应用该预设；右键点击预设 = 删除该预设。
+</div>
+
+<h1 id="faq">常见问题</h1>
+
+<h3>Q：模型加载失败，提示"TensorRT EP不可用"？</h3>
+<p><strong>A：</strong>DirectML模式依赖TensorRT EP和cuDNN，请检查：</p>
+<ul>
+<li>程序目录下是否有 <code>cudnn64_9.dll</code>、<code>cudnn_ops64_9.dll</code> 等cuDNN DLL</li>
+<li>是否有 <code>onnxruntime_providers_tensorrt.dll</code></li>
+<li>如cuDNN缺失，从NVIDIA官网下载cuDNN 9.x for CUDA 13，将<code>bin/x64/</code>下所有DLL复制到程序目录</li>
+</ul>
+
+<h3>Q：为什么提示"未以管理员权限运行"？</h3>
+<p><strong>A：</strong>鼠标驱动需要管理员权限才能在游戏中正常工作。请右键程序 → <strong>以管理员身份运行</strong>。</p>
+
+<h3>Q：推理延迟很高/游戏卡顿？</h3>
+<p><strong>A：</strong>尝试以下优化：</p>
+<ul>
+<li>使用 <strong>FP16半精度</strong> 替代FP32</li>
+<li>降低模型输入尺寸（使用更小的模型）</li>
+<li>确保零拷贝和CUDA Graph已启用</li>
+<li>关闭预览窗口减少资源占用</li>
+<li>关闭Windows <strong>游戏模式</strong>（设置→游戏→游戏模式），游戏模式会优先分配GPU给游戏导致推理延迟暴增</li>
+<li>确认GPU驱动为最新版本</li>
+</ul>
+
+<h3>Q：锁不住目标/吸附力太弱？</h3>
+<p><strong>A：</strong>调整以下参数：</p>
+<ul>
+<li><strong>提高Kp</strong>（0.35~0.50），增加基础响应速度</li>
+<li><strong>提高速度倍率</strong>（1.0~1.5），全局加速</li>
+<li><strong>增大最大步长</strong>（18~25），允许每帧移动更多</li>
+<li><strong>减小死区</strong>（3~5），避免锁定过早停止</li>
+<li>v1.0.6已内置最小移动速度2px/帧，确保不爬行</li>
+</ul>
+
+<h3>Q：开枪后准心往上漂？</h3>
+<p><strong>A：</strong>这是后坐力推准心导致的，调参建议：</p>
+<ul>
+<li><strong>降低Kp</strong>（0.20~0.30），减少基础响应</li>
+<li><strong>增大惯性</strong>（0.25~0.40），增加平滑抑制</li>
+<li><strong>适当提高Kd</strong>（0.15~0.25），增强制动</li>
+</ul>
+
+<h3>Q：左右过冲/越过目标？</h3>
+<p><strong>A：</strong>v1.0.6已从算法层面保证零过冲（90%硬钳位），如仍感觉过冲：</p>
+<ul>
+<li><strong>降低Kp</strong>（0.20~0.25），减少每帧移动量</li>
+<li><strong>适当提高Kd</strong>（0.20~0.30），增强接近目标时的制动</li>
+<li><strong>减小最大步长</strong>（10~15），限制每帧移动上限</li>
+<li><strong>增大死区</strong>（5~8），更早停止</li>
+</ul>
+
+<h3>Q：目标频繁切换/锁不住？</h3>
+<p><strong>A：</strong></p>
+<ul>
+<li>算法已内置锁定粘性：锁定目标存活时绝不切换，需丢检8帧以上才切换</li>
+<li>开启 <strong>FOV自动缩放</strong>，锁定后缩小搜索范围</li>
+<li>v1.0.6已修复追踪器丢匹配时即时重获取，不再晃悠半天才锁住</li>
+</ul>
+
+<h3>Q：罗技驱动不可用？</h3>
+	<p><strong>A：</strong>罗技驱动需要双重检测通过：①LGHUB客户端正在运行 ②驱动DLL可用。请确认：</p>
+	<ul>
+	<li>罗技G HUB软件已安装且 <strong>正在运行</strong>（检查任务栏图标）</li>
+	<li><code>logitech.driver.dll</code> 在程序目录中</li>
+	<li>如不可用，请切换至通用驱动或Makcu模式</li>
+	</ul>
+
+<h3>Q：Makcu盒子连接失败？</h3>
+<p><strong>A：</strong>参考上方 <a href="#makcu-setup">Makcu连接配置</a> 章节的故障排查步骤。</p>
+
+<h1 id="param-reference">参数对照表</h1>
+<p>所有可调参数的完整参考：</p>
+<table>
+<tr><th>界面名称</th><th>默认值</th><th>范围</th><th>所在面板</th></tr>
+<tr><td>置信度阈值</td><td>0.25</td><td>0.01 ~ 1.0</td><td>模型设置</td></tr>
+<tr><td>NMS阈值</td><td>0.45</td><td>0.01 ~ 1.0</td><td>模型设置</td></tr>
+<tr><td>比例增益Kp</td><td>0.30</td><td>0.01 ~ 1.00</td><td>自瞄设置</td></tr>
+<tr><td>微分增益Kd</td><td>0.15</td><td>0.000 ~ 2.000</td><td>自瞄设置</td></tr>
+<tr><td>死区</td><td>5.0</td><td>0.0 ~ 15.0</td><td>自瞄设置</td></tr>
+<tr><td>速度倍率</td><td>1.0</td><td>0.1 ~ 3.0</td><td>自瞄设置</td></tr>
+<tr><td>吸附位置Y</td><td>0.0</td><td>0.0 ~ 1.0</td><td>自瞄设置</td></tr>
+<tr><td>吸附位置X</td><td>0.5</td><td>0.0 ~ 1.0</td><td>自瞄设置</td></tr>
+<tr><td>按类别瞄准位置</td><td>关闭</td><td>开/关</td><td>自瞄设置</td></tr>
+<tr><td>视野范围</td><td>1.0</td><td>0.1 ~ 1.0</td><td>自瞄设置</td></tr>
+<tr><td>锁定FOV</td><td>0.15</td><td>0.05 ~ 0.5</td><td>自瞄设置</td></tr>
+<tr><td>缩放速度</td><td>5.0</td><td>0.5 ~ 50.0</td><td>自瞄设置</td></tr>
+<tr><td>还原速度</td><td>2.0</td><td>0.5 ~ 50.0</td><td>自瞄设置</td></tr>
+<tr><td>FOV自动缩放</td><td>开启</td><td>开/关</td><td>自瞄设置</td></tr>
+<tr><td>目标策略</td><td>距离优先</td><td>距离/大小</td><td>自瞄设置</td></tr>
+	<tr><td>启用总开关</td><td>关闭</td><td>开/关</td><td>自瞄总开关</td></tr>
+	<tr><td>总开关按键模式</td><td>单键</td><td>单键/组合键</td><td>自瞄总开关</td></tr>
+	<tr><td>总开关按键</td><td>F10</td><td>72个按键</td><td>自瞄总开关</td></tr>
+	<tr><td>总开关组合键</td><td>左Ctrl</td><td>72个按键</td><td>自瞄总开关(组合键模式)</td></tr>
+<tr><td>最大步长</td><td>18.0</td><td>1.0 ~ 50.0</td><td>高级移动</td></tr>
+<tr><td>惯性</td><td>0.20</td><td>0.0 ~ 0.95</td><td>高级移动</td></tr>
+<tr><td>匹配阈值</td><td>100.0</td><td>50.0 ~ 250.0</td><td>高级优化</td></tr>
+<tr><td>丢失容忍</td><td>30</td><td>5 ~ 40</td><td>高级优化</td></tr>
+<tr><td>切换阻力</td><td>0.45</td><td>0.0 ~ 0.5</td><td>高级优化</td></tr>
+<tr><td>启用卡尔曼滤波</td><td>开启</td><td>开/关</td><td>卡尔曼</td></tr>
+<tr><td>过程噪声</td><td>12.0</td><td>1.0 ~ 30.0</td><td>卡尔曼</td></tr>
+<tr><td>测量噪声</td><td>2.0</td><td>0.5 ~ 20.0</td><td>卡尔曼</td></tr>
+<tr><td>预测提前量</td><td>0.018</td><td>0.005 ~ 0.06</td><td>卡尔曼</td></tr>
+<tr><td>场景自适应</td><td>开启</td><td>开/关</td><td>高级优化</td></tr>
+<tr><td>自动锁帧</td><td>开启</td><td>开/关</td><td>性能监控</td></tr>
+<tr><td>目标FPS</td><td>0</td><td>0 ~ 144</td><td>性能监控</td></tr>
+<tr><td>安全防截图</td><td>关闭</td><td>开/关</td><td>捕获设置</td></tr>
+<tr><td>显示预览窗口</td><td>开启</td><td>开/关</td><td>捕获设置</td></tr>
+<tr><td>启用对狙</td><td>关闭</td><td>开/关</td><td>对狙设置</td></tr>
+<tr><td>对狙触发键</td><td>鼠标侧键1</td><td>72个按键</td><td>对狙设置</td></tr>
+<tr><td>开枪延迟(帧)</td><td>3</td><td>0 ~ 20</td><td>对狙设置</td></tr>
+<tr><td>启用自动扳机</td><td>关闭</td><td>开/关</td><td>自动扳机</td></tr>
+<tr><td>自动扳机触发键</td><td>无</td><td>72个按键</td><td>自动扳机</td></tr>
+<tr><td>开枪延迟(ms)</td><td>50</td><td>0 ~ 500</td><td>自动扳机</td></tr>
+<tr><td>触发阈值(px)</td><td>5.0</td><td>0.5 ~ 30.0</td><td>自动扳机</td></tr>
+<tr><td>拟人化随机</td><td>开启</td><td>开/关</td><td>自动扳机</td></tr>
+</table>
+
+<h1 id="changelog">版本更新记录</h1>
+
+<h3>v1.0.7 (2026-08-21)</h3>
+<table>
+<tr><th>类型</th><th>内容</th></tr>
+<tr><td><span class="tag tag-green">新增</span></td><td><strong>Home 键窗口显隐切换</strong>：按 Home 隐藏/显示主窗口，全屏游戏下窗口被覆盖时可随时找回配置面板；隐藏时瞄准逻辑不受影响（渲染跳帧，检测+推理+移动照常运行）</td></tr>
+<tr><td><span class="tag tag-green">新增</span></td><td><strong>窗口随机化标识</strong>：主窗口类名与标题每次启动随机生成 8 位 hex，破坏基于固定字符串/类名的特征匹配检测</td></tr>
+<tr><td><span class="tag tag-green">新增</span></td><td><strong>移动输出拟人化层</strong>：在安全钳位之后叠加四层扰动——幅度乘性抖动(±25%)、弧线侧偏(曲率0.02~0.08,总漂移±5px封顶)、正弦微扰(±0.3px)、高斯噪声(σ=0.5px)——输出序列从"完美指数曲线"变为"人手风格"，对抗行为统计分类器</td></tr>
+<tr><td><span class="tag tag-orange">优化</span></td><td>主窗口改为 <strong>WS_EX_TOOLWINDOW</strong> 样式，不再出现在任务栏和 Alt-Tab 切换列表，降低被枚举发现概率</td></tr>
+<tr><td><span class="tag tag-orange">优化</span></td><td>新增 <strong>ui_toggle_key</strong> 配置项，默认 VK_HOME，可自定义显隐热键</td></tr>
+<tr><td><span class="tag tag-orange">优化</span></td><td>锁定核心算法保持 v1.0.6 纯 PD 控制手感不变，所有防检测增强均在输出层，不改变瞄准行为</td></tr>
+</table>
+
+<h3>v1.0.6 (2026-08-15)</h3>
+<table>
+<tr><th>类型</th><th>内容</th></tr>
+<tr><td><span class="tag tag-green">新增</span></td><td>最小移动速度2px/帧：误差小时确保准星不爬行，快速锁定目标不拖沓</td></tr>
+<tr><td><span class="tag tag-green">新增</span></td><td>零过冲多重保障：90%硬钳位 + D制动限制 + 跳帧零移动，数学上保证不过冲</td></tr>
+<tr><td><span class="tag tag-green">新增</span></td><td>目标即时重获取：追踪器丢匹配时立即在80px半径内搜索新鲜检测，不再晃悠半天才锁住</td></tr>
+<tr><td><span class="tag tag-orange">优化</span></td><td><strong>精简参数界面</strong>：移除积分项(Ki)、平滑度、加速曲线(近距/远距)、精细距离、抖动随机化等复杂参数，仅保留Kp、Kd、死区、速度倍率、最大步长、惯性六个核心参数，新手即调即用</td></tr>
+<tr><td><span class="tag tag-orange">优化</span></td><td>PD控制简化：D项改为仅制动模式(接近目标时减速，目标远离时不加速)，最多削减P的50%，D拉满也不会反向抖动</td></tr>
+<tr><td><span class="tag tag-orange">优化</span></td><td>更新默认参数：Kp=0.30 Kd=0.15 死区=5 惯性=0.20 最大步长=18</td></tr>
+<tr><td><span class="tag tag-orange">优化</span></td><td>死区从10px调整为5px，锁定更紧密；配合最小移动速度确保快速收敛</td></tr>
+<tr><td><span class="tag tag-orange">优化</span></td><td>目标选择策略修复：使用原始像素距离评分，FOV拉满时不再跳着锁目标，始终锁定最近目标</td></tr>
+<tr><td><span class="tag tag-orange">优化</span></td><td>跳帧(检测间隔帧)完全停止移动，防止累积过冲</td></tr>
+<tr><td><span class="tag tag-orange">优化</span></td><td>重新获取目标时不重置移动状态，保持动量不卡顿</td></tr>
+<tr><td><span class="tag tag-red">修复</span></td><td>修复移动过冲/左右互搏振荡问题：移除灵敏度估计反馈环，回归纯PD控制</td></tr>
+<tr><td><span class="tag tag-red">修复</span></td><td>修复D项拉满时"一抽一抽"抖动：D制动限制为P的50%，不会反转移动方向</td></tr>
+<tr><td><span class="tag tag-red">修复</span></td><td>修复锁定目标后"晃晃悠悠半天才锁住"：追踪器丢匹配时即时重获取，搜索半径从27px扩大到80px</td></tr>
+<tr><td><span class="tag tag-red">修复</span></td><td>修复目标选择策略在FOV拉满时锁错目标的问题</td></tr>
+<tr><td><span class="tag tag-red">修复</span></td><td>修复重新获取目标时搜索位置漂移导致滑过目标A锁到目标B的问题</td></tr>
+</table>
+
+<h3>v1.0.5 (2026-08-07)</h3>
+<table>
+<tr><th>类型</th><th>内容</th></tr>
+<tr><td><span class="tag tag-green">新增</span></td><td>新增按类别独立设置瞄准位置功能，可为每个类别单独配置Y轴吸附位置（如敌人0.35脖子、小兵0.25爆头）</td></tr>
+<tr><td><span class="tag tag-green">新增</span></td><td>启用按类别设置后自动隐藏全局吸附位置Y，仅在上方勾选的类别显示设置滑块，交互更清晰</td></tr>
+<tr><td><span class="tag tag-green">新增</span></td><td>首次启动自动检测屏幕刷新率，根据刷新率缩放默认参数(Kp/Ki/步长/惯性)，高刷新率(144Hz)不再过冲</td></tr>
+<tr><td><span class="tag tag-orange">优化</span></td><td>更新默认参数：Kp=0.40 Ki=0.005 Kd=2.0 死区=3 步长=14 FOV=1.0（60Hz基准）</td></tr>
+<tr><td><span class="tag tag-orange">优化</span></td><td>积分项帧率归一化：PID积分累加使用实际帧间隔dt，修复高刷新率显示器(144Hz)下积分累加过快导致过冲/甩动的问题</td></tr>
+<tr><td><span class="tag tag-orange">优化</span></td><td>目标切换阈值机制：已有锁定目标时，新目标评分必须比锁定目标低一定比例才允许切换，防止随意跳目标</td></tr>
+<tr><td><span class="tag tag-orange">优化</span></td><td>切换冷却机制：目标切换后330ms内不再评估切换，避免频繁跳目标</td></tr>
+<tr><td><span class="tag tag-orange">优化</span></td><td>锁定目标被遮挡时不评估切换，由Kalman预测维持锁定，防止遮挡时跳到其他目标</td></tr>
+<tr><td><span class="tag tag-red">修复</span></td><td>修复前台高刷新率下积分过大导致锁不住目标、锁目标会甩的问题</td></tr>
+<tr><td><span class="tag tag-red">修复</span></td><td>修复后台隐藏窗口时鼠标移动抖动和停顿的问题（frameDt强制固定+积分帧率归一化）</td></tr>
+</table>
+
+<h3>v1.0.4 (2026-08-04)</h3>
+<table>
+<tr><th>类型</th><th>内容</th></tr>
+<tr><td><span class="tag tag-orange">优化</span></td><td>移动量衰减dt归一化，后台高帧率下衰减不再过快，移动连续无断续</td></tr>
+<tr><td><span class="tag tag-red">修复</span></td><td>修复后台隐藏窗口时移动量衰减过快导致鼠标抖动的问题</td></tr>
+</table>
+
+<h3>v1.0.3 (2026-08-01)</h3>
+<table>
+<tr><th>类型</th><th>内容</th></tr>
+<tr><td><span class="tag tag-red">修复</span></td><td>修复自动扳机关闭时，手动按住左键开枪偶尔失灵的BUG（鼠标钩子误判物理按键状态导致误发leftUp）</td></tr>
+<tr><td><span class="tag tag-red">修复</span></td><td>修复自动扳机只开一枪就停的问题，改为每帧持续断言leftDown（非连点），全自动武器可完整清空弹夹</td></tr>
+<tr><td><span class="tag tag-red">修复</span></td><td>修复自动扳机停止后用户物理按住左键却无法继续开枪的问题，释放虚拟按键时检测物理状态并立即恢复</td></tr>
+<tr><td><span class="tag tag-orange">优化</span></td><td>自动扳机不再干涉用户的手动左键操作，未启用时完全不影响正常开枪</td></tr>
+<tr><td><span class="tag tag-blue">技术</span></td><td>虚拟鼠标事件添加AT_MAGIC标记(0x41545244)，鼠标钩子排除虚拟事件，物理按键追踪更准确</td></tr>
+</table>
+
+<h3>v1.0.2 (2026-07-30)</h3>
+<table>
+<tr><th>类型</th><th>内容</th></tr>
+<tr><td><span class="tag tag-green">新增</span></td><td>新增自动扳机功能，准星到达目标时自动按住左键开枪，支持全自动武器持续射击</td></tr>
+<tr><td><span class="tag tag-green">新增</span></td><td>新增自瞄总开关功能，防止局外误锁目标，支持单键/组合键切换</td></tr>
+<tr><td><span class="tag tag-orange">优化</span></td><td>去掉自瞄总开关的音效提示，避免频繁开关时干扰</td></tr>
+</table>
+
+<h3>v1.0.1 (2026-07-25)</h3>
+<table>
+<tr><th>类型</th><th>内容</th></tr>
+<tr><td><span class="tag tag-green">新增</span></td><td>新增对狙功能（瞬间吸附+自动开枪）</td></tr>
+<tr><td><span class="tag tag-green">新增</span></td><td>新增Makcu硬件盒子鼠标驱动支持</td></tr>
+</table>
+
+<div class="doc-footer">
+D5 Render 使用说明书 &copy; 2026 &middot; 仅限技术研究与单机娱乐用途<br>
+严禁用于任何违反服务条款的在线活动 &middot; 违规使用的一切法律后果由用户自行承担
+</div>
+</div>
+
+<script>
+const navItems=document.querySelectorAll('.nav-item');
+const sections=[];
+navItems.forEach(item=>{
+const href=item.getAttribute('href');
+if(href&&href.startsWith('#')){
+const el=document.getElementById(href.slice(1));
+if(el)sections.push({el,nav:item});
+}
+});
+function updateActiveNav(){
+let current=null;
+for(let i=sections.length-1;i>=0;i--){
+const rect=sections[i].el.getBoundingClientRect();
+if(rect.top<=120){current=sections[i];break;}
+}
+navItems.forEach(n=>n.classList.remove('active'));
+if(current)current.nav.classList.add('active');
+}
+window.addEventListener('scroll',updateActiveNav,{passive:true});
+updateActiveNav();
+</script>
+</body>
+</html>
