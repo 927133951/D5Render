@@ -1,0 +1,1 @@
+#define IDI_D5RENDER 101

@@ -1,0 +1,28 @@
+# 构建产物与运行时
+build/
+*.pdb
+*.log
+crash.log
+
+# 大型SDK与压缩包(不入库)
+cudnn-windows-x86_64-9.24.0.43_cuda13-archive/
+directml_sdk/
+onnxruntime_dml/
+onnxruntime_gpu/
+openvino_sdk/
+onnxruntime_gpu_cuda13.zip
+*.zip
+*.onnx
+*.trt10.*
+*.engine
+
+# 备份与快照
+backups/
+snapshots/
+.screenshots/
+*.bak_*
+*.bak
+
+# Python缓存与仿真输出
+__pycache__/
+aim_sim/输出/
