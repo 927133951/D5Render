@@ -37,8 +37,7 @@ struct CustomPreset {
 	int infer_gpu_id = 0;  // [v218] 推理专用GPU: 0=与捕获同卡(兼容旧行为), 1/2=独立推理卡(与游戏物理解耦根治延迟)
 	float move_max_step = 14.0f;  // [v215] 25→14: 单帧位移封顶, 吸附稳不过冲
 	float move_inertia = 0.22f;  // [v234] 曲线平滑: smoothstep缓动, 近距轻柔远距直给
-	float move_jitter_range = 1.5f;
-	float move_jitter_scale = 0.8f;
+	float humanize_strength = 1.0f;  // [v235] 拟人抖动强度: 拉得越大抖动越厉害(0=无扰动 1=标准 2=强力)
 	float move_accel_near = 30.0f;
 	float move_accel_far = 100.0f;
 	float move_fine_dist = 25.0f;
@@ -117,8 +116,7 @@ struct D5RenderConfig {
 	float os_damp = 0.70f;   // 每次过冲后保留的力道比例(越小越狠)
 	float os_base = 1.0f;    // 手动基准力道(1.0=完整UI增益)
 	float move_inertia = 0.22f;  // [v234] 曲线平滑: smoothstep缓动, 近距轻柔远距直给
-	float move_jitter_range = 1.5f;
-	float move_jitter_scale = 0.8f;
+	float humanize_strength = 1.0f;  // [v235] 拟人抖动强度: 拉得越大抖动越厉害(0=无扰动 1=标准 2=强力)
 	float move_accel_near = 30.0f;
 	float move_accel_far = 100.0f;
 	float move_fine_dist = 25.0f;

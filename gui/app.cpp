@@ -2488,7 +2488,14 @@ void App::renderParamsPanel() {
 		ImGui::SliderFloat(OBS8("##aim_fov").c_str(), &m_config.aim_fov, 0.1f, 1.0f, "%.2f");
 		if (ImGui::IsItemHovered()) ImGui::SetTooltip(OBS3(u8"自瞄搜索目标的圆形视野范围\n1.0=整个捕获区域\n0.1=仅屏幕中心附近\n推荐: 0.30~0.60\n圆形范围外的目标不会被检测和瞄准").c_str());
 		ImGui::Checkbox(OBS5(u8"启用拟人化抖动").c_str(), &m_config.move_randomize);
-		if (ImGui::IsItemHovered()) ImGui::SetTooltip(OBS4(u8"模拟人手特征的输出扰动(幅度抖动±25%/弧线轨迹/正弦微扰/高斯噪声)\n开启: 对抗行为统计检测, 但吸附目标后会持续轻微抖动\n关闭(默认): 输出纯净, 吸附后完全静止, 开枪压枪稳定不晃\n建议: 追求稳定跟枪压枪时保持关闭").c_str());
+		if (ImGui::IsItemHovered()) ImGui::SetTooltip(OBS4(u8"模拟人手特征的输出扰动(幅度抖动/弧线轨迹/正弦微扰/高斯噪声)\n开启后由下方[抖动强度]滑条控制幅度, 拉得越大抖动越厉害\n关闭(默认): 输出纯净, 吸附后完全静止, 开枪压枪稳定不晃").c_str());
+		ImGui::AlignTextToFramePadding();
+		ImGui::TextUnformatted(OBS1(u8"抖动强度").c_str());
+		ImGui::SameLine();
+		ImGui::SetNextItemWidth(-1);
+		ImGui::SliderFloat(OBS1("##human_str").c_str(), &m_config.humanize_strength, 0.0f, 2.0f, "%.2f");
+		if (ImGui::IsItemHovered()) ImGui::SetTooltip(OBS1(u8"拟人扰动的总强度: 拉得越大抖动越厉害\n0.0=无扰动(输出纯净, 等效关闭抖动)\n1.0=标准拟人(默认)\n2.0=强力(扰动翻倍, 反检测更强但晃动明显)\n需先开启[启用拟人化抖动]开关").c_str());
+		ImGui::Spacing();
 		ImGui::AlignTextToFramePadding();
 		ImGui::TextUnformatted(OBS3(u8"速度倍率").c_str());
 		ImGui::SameLine();

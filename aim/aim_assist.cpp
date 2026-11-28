@@ -122,6 +122,7 @@ void AimAssist::update(const std::vector<Detection>& detections, int captureCX, 
 	m_aimActive = aimActive;
 	m_shooting = shooting;
 	m_aimFov = config.aim_fov;
+	m_humanizeStrength = config.humanize_strength;  // [v235] 同步拟人抖动强度
 	if (m_switchCooldown > 0) m_switchCooldown--;
 	auto now = std::chrono::steady_clock::now();
 	float dt = (float)std::chrono::duration<double>(now - m_lastUpdateTime).count();
@@ -818,26 +819,29 @@ AimTarget AimAssist::getMoveDelta(float dt) {
 	// 机器特征：固定衰减比的完美指数曲线+笔直直线。
 	// 全部扰动零均值或受限漂移，检测帧重算误差的闭环自动吸收残余偏差。
 	// [v229] 按整步设计(扰动脉宽=检测周期), 只在fresh帧施加一次, 结果折算进速率摊薄发射
-	if (m_aimActive && m_humanizeEnabled) {  // [v217] 接上move_randomize开关(之前是摆设, 拟人层无条件运行)
+	float hStrength = m_humanizeStrength;  // [v235] 拟人抖动强度: 拉得越大抖动越厉害(update每帧同步)
+	if (m_aimActive && m_humanizeEnabled && hStrength > 0.01f) {  // [v217] 接上move_randomize开关
 		float md = std::sqrt(moveX * moveX + moveY * moveY);
-		// [v225] 贴附区(误差<20px)关闭拟人扰动: ±25%幅度抖动+σ0.5噪声在贴附边缘
+		// [v225] 贴附区(误差<20px)关闭拟人扰动: 幅度抖动+噪声在贴附边缘
 		// =随机游走("松/晃"帮凶), 硬磁吸要求修正纯净。追击段(≥20px)拟人全开保反检测
 		float errMag = std::sqrt(m_lockedX * m_lockedX + m_lockedY * m_lockedY);
 		if (md > 0.3f && errMag >= 20.0f) {
 			// 新锁定判定：lockFrames 回落说明换了目标/重锁 -> 重掷弧线参数
 			if (m_lockFrames < m_prevHumanLockFrames) {
 				std::uniform_real_distribution<float> curv(0.02f, 0.08f);
-				m_arcCurv = curv(m_rng) * ((m_rng() & 1) ? 1.0f : -1.0f);
+				m_arcCurv = curv(m_rng) * hStrength * ((m_rng() & 1) ? 1.0f : -1.0f);
 				m_arcLateral = 0;
 				m_wobblePhase = (float)(m_rng() % 628) * 0.01f;
 			}
 			m_prevHumanLockFrames = m_lockFrames;
 
-			// 1) 幅度乘性抖动：±25%，打破固定衰减比（对数正态手感）
-			std::normal_distribution<float> magJ(0.0f, 0.12f);
+			// 1) 幅度乘性抖动：σ=0.12×强度(默认1.0时约±25%)，打破固定衰减比（对数正态手感）
+			std::normal_distribution<float> magJ(0.0f, 0.12f * hStrength);
 			float magScale = 1.0f + magJ(m_rng);
-			if (magScale > 1.30f) magScale = 1.30f;
-			if (magScale < 0.75f) magScale = 0.75f;
+			float magLo = 1.0f - 0.25f * hStrength;
+			float magHi = 1.0f + 0.30f * hStrength;
+			if (magScale > magHi) magScale = magHi;
+			if (magScale < magLo) magScale = magLo;
 			moveX *= magScale;
 			moveY *= magScale;
 
@@ -846,37 +850,37 @@ AimTarget AimAssist::getMoveDelta(float dt) {
 			float perpX = -moveY * invMd;
 			float perpY = moveX * invMd;
 
-			// 2) 弧线侧偏：曲率×步长，单帧≤2px、总漂移±5px封顶，接近目标(20px内)渐隐
+			// 2) 弧线侧偏：曲率×步长×强度，单帧≤2px×强度、总漂移±5px×强度封顶，接近目标(20px内)渐隐
 			float arcFade = (md < 20.0f) ? (md / 20.0f) : 1.0f;
 			float latStep = m_arcCurv * md * arcFade;
-			if (latStep > 2.0f) latStep = 2.0f;
-			if (latStep < -2.0f) latStep = -2.0f;
+			if (latStep > 2.0f * hStrength) latStep = 2.0f * hStrength;
+			if (latStep < -2.0f * hStrength) latStep = -2.0f * hStrength;
 			m_arcLateral += latStep;
-			if (m_arcLateral > 5.0f) { latStep -= (m_arcLateral - 5.0f); m_arcLateral = 5.0f; }
-			if (m_arcLateral < -5.0f) { latStep -= (m_arcLateral + 5.0f); m_arcLateral = -5.0f; }
+			if (m_arcLateral > 5.0f * hStrength) { latStep -= (m_arcLateral - 5.0f * hStrength); m_arcLateral = 5.0f * hStrength; }
+			if (m_arcLateral < -5.0f * hStrength) { latStep -= (m_arcLateral + 5.0f * hStrength); m_arcLateral = -5.0f * hStrength; }
 			moveX += perpX * latStep;
 			moveY += perpY * latStep;
 
 			// 3) 正弦微扰：±0.3px，相位随机推进（打破固定帧对齐）
 			m_wobblePhase += 0.7f + (float)(m_rng() % 100) * 0.006f;
-			float wob = std::sin(m_wobblePhase) * 0.3f;
+			float wob = std::sin(m_wobblePhase) * 0.3f * hStrength;
 			moveX += perpX * wob;
 			moveY += perpY * wob;
 
-			// 4) 高斯微噪声：σ=0.5px（模拟手部生理抖动+传感器噪声），
+			// 4) 高斯微噪声：σ=0.5px×强度（模拟手部生理抖动+传感器噪声），
 			//    小步长时按比例缩放，静止时无噪声（避免死区内空转）
 			float noiseScale = (md < 3.0f) ? (md / 3.0f) : 1.0f;
-			std::normal_distribution<float> gn(0.0f, 0.5f * noiseScale);
+			std::normal_distribution<float> gn(0.0f, 0.5f * hStrength * noiseScale);
 			float nx = gn(m_rng), ny = gn(m_rng);
-			if (nx > 0.9f) nx = 0.9f; else if (nx < -0.9f) nx = -0.9f;
-			if (ny > 0.9f) ny = 0.9f; else if (ny < -0.9f) ny = -0.9f;
+			if (nx > 0.9f * hStrength) nx = 0.9f * hStrength; else if (nx < -0.9f * hStrength) nx = -0.9f * hStrength;
+			if (ny > 0.9f * hStrength) ny = 0.9f * hStrength; else if (ny < -0.9f * hStrength) ny = -0.9f * hStrength;
 			moveX += nx;
 			moveY += ny;
 		}
 	}
 
 		// ── 终极防穿越 ──
-		// 拟人化扰动(±25%幅度+弧线+噪声)发生在90%钳位之后，最大可放大到
+		// 拟人化扰动(幅度抖动+弧线+噪声)发生在90%钳位之后，最大可放大到
 		// 误差的1.3倍 → 近距离单帧越过目标。输出前按当前误差再钳一次(98%)：
 		// 每帧移动严格小于到目标的剩余误差 → 物理上不可能跨过要去的目标。
 		{

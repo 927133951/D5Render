@@ -7,7 +7,7 @@
 #define D5_VERSION_MAJOR 1
 #define D5_VERSION_MINOR 0
 #define D5_VERSION_PATCH 9
-#define D5_VERSION_STRING "1.0.9-v234"
+#define D5_VERSION_STRING "1.0.9-v235"
 struct UpdateInfo {
 	bool hasUpdate = false;
 	std::string latestVersion;

@@ -222,8 +222,7 @@ void D5RenderConfig::saveToFile() const {
 	out << OBS6("os_damp") << "=" << encNum(os_damp) << "\n";
 	out << OBS7("os_base") << "=" << encNum(os_base) << "\n";
 	out << OBS1("move_inertia") << "=" << encNum(move_inertia) << "\n";
-	out << OBS2("move_jitter_range") << "=" << encNum(move_jitter_range) << "\n";
-	out << OBS3("move_jitter_scale") << "=" << encNum(move_jitter_scale) << "\n";
+	out << OBS2("humanize_strength") << "=" << encNum(humanize_strength) << "\n";
 	out << OBS4("move_accel_near") << "=" << encNum(move_accel_near) << "\n";
 	out << OBS5("move_accel_far") << "=" << encNum(move_accel_far) << "\n";
 	out << OBS6("move_fine_dist") << "=" << encNum(move_fine_dist) << "\n";
@@ -265,8 +264,7 @@ void D5RenderConfig::saveToFile() const {
 		out << OBS7("cp_move_randomize") << "=" << encNum((int32_t)(cp.move_randomize ? 1 : 0)) << "\n";
 		out << OBS8("cp_move_max_step") << "=" << encNum(cp.move_max_step) << "\n";
 		out << OBS1("cp_move_inertia") << "=" << encNum(cp.move_inertia) << "\n";
-		out << OBS2("cp_move_jitter_range") << "=" << encNum(cp.move_jitter_range) << "\n";
-		out << OBS3("cp_move_jitter_scale") << "=" << encNum(cp.move_jitter_scale) << "\n";
+		out << OBS2("cp_humanize_strength") << "=" << encNum(cp.humanize_strength) << "\n";
 		out << OBS4("cp_move_accel_near") << "=" << encNum(cp.move_accel_near) << "\n";
 		out << OBS5("cp_move_accel_far") << "=" << encNum(cp.move_accel_far) << "\n";
 		out << OBS6("cp_move_fine_dist") << "=" << encNum(cp.move_fine_dist) << "\n";
@@ -391,8 +389,7 @@ bool D5RenderConfig::loadFromFile() {
 	if (key == OBS6("os_damp")) { float v = decNum<float>(val, 0.70f); if (v < 0.30f || v > 0.95f) v = 0.70f; os_damp = v; }
 	if (key == OBS7("os_base")) { float v = decNum<float>(val, 1.0f); if (v < 0.10f || v > 1.0f) v = 1.0f; os_base = v; }
 	if (key == OBS1("move_inertia")) { float v = decNum<float>(val, 0.35f); if (v < 0.0f || v > 0.95f) v = 0.35f; move_inertia = v; }
-	if (key == OBS2("move_jitter_range")) { float v = decNum<float>(val, 1.5f); if (v < 0.0f || v > 5.0f) v = 1.5f; move_jitter_range = v; }
-	if (key == OBS3("move_jitter_scale")) { float v = decNum<float>(val, 0.8f); if (v < 0.0f || v > 2.0f) v = 0.8f; move_jitter_scale = v; }
+	if (key == OBS2("humanize_strength")) { float v = decNum<float>(val, 1.0f); if (v < 0.0f || v > 2.0f) v = 1.0f; humanize_strength = v; }
 	if (key == OBS4("move_accel_near")) { float v = decNum<float>(val, 30.0f); if (v < 5.0f || v > 200.0f) v = 30.0f; move_accel_near = v; }
 	if (key == OBS5("move_accel_far")) { float v = decNum<float>(val, 100.0f); if (v < 10.0f || v > 500.0f) v = 100.0f; move_accel_far = v; }
 	if (key == OBS6("move_fine_dist")) { float v = decNum<float>(val, 25.0f); if (v < 1.0f || v > 100.0f) v = 25.0f; move_fine_dist = v; }
@@ -435,8 +432,7 @@ bool D5RenderConfig::loadFromFile() {
 		if (key == OBS7("cp_move_randomize")) { if (m_loadingCpIdx >= 0 && m_loadingCpIdx < (int)custom_presets.size()) custom_presets[m_loadingCpIdx].move_randomize = decNum<int32_t>(val, 1) != 0; }
 		if (key == OBS8("cp_move_max_step")) { if (m_loadingCpIdx >= 0 && m_loadingCpIdx < (int)custom_presets.size()) { float v = decNum<float>(val, 25.0f); if (v < 1.0f || v > 50.0f) v = 25.0f; custom_presets[m_loadingCpIdx].move_max_step = v; } }
 		if (key == OBS1("cp_move_inertia")) { if (m_loadingCpIdx >= 0 && m_loadingCpIdx < (int)custom_presets.size()) { float v = decNum<float>(val, 0.35f); if (v < 0.0f || v > 0.95f) v = 0.35f; custom_presets[m_loadingCpIdx].move_inertia = v; } }
-		if (key == OBS2("cp_move_jitter_range")) { if (m_loadingCpIdx >= 0 && m_loadingCpIdx < (int)custom_presets.size()) { float v = decNum<float>(val, 1.5f); if (v < 0.0f || v > 10.0f) v = 1.5f; custom_presets[m_loadingCpIdx].move_jitter_range = v; } }
-		if (key == OBS3("cp_move_jitter_scale")) { if (m_loadingCpIdx >= 0 && m_loadingCpIdx < (int)custom_presets.size()) { float v = decNum<float>(val, 0.8f); if (v < 0.0f || v > 5.0f) v = 0.8f; custom_presets[m_loadingCpIdx].move_jitter_scale = v; } }
+		if (key == OBS2("cp_humanize_strength")) { if (m_loadingCpIdx >= 0 && m_loadingCpIdx < (int)custom_presets.size()) { float v = decNum<float>(val, 1.0f); if (v < 0.0f || v > 2.0f) v = 1.0f; custom_presets[m_loadingCpIdx].humanize_strength = v; } }
 		if (key == OBS4("cp_move_accel_near")) { if (m_loadingCpIdx >= 0 && m_loadingCpIdx < (int)custom_presets.size()) { float v = decNum<float>(val, 30.0f); if (v < 1.0f || v > 200.0f) v = 30.0f; custom_presets[m_loadingCpIdx].move_accel_near = v; } }
 		if (key == OBS1("cp_move_accel_far")) { if (m_loadingCpIdx >= 0 && m_loadingCpIdx < (int)custom_presets.size()) { float v = decNum<float>(val, 100.0f); if (v < 1.0f || v > 500.0f) v = 100.0f; custom_presets[m_loadingCpIdx].move_accel_far = v; } }
 		if (key == OBS2("cp_move_fine_dist")) { if (m_loadingCpIdx >= 0 && m_loadingCpIdx < (int)custom_presets.size()) { float v = decNum<float>(val, 25.0f); if (v < 1.0f || v > 200.0f) v = 25.0f; custom_presets[m_loadingCpIdx].move_fine_dist = v; } }
@@ -537,8 +533,7 @@ void D5RenderConfig::saveToPath(const std::string& path) const {
 	out << OBS6("os_damp") << "=" << encNum(os_damp) << "\n";
 	out << OBS7("os_base") << "=" << encNum(os_base) << "\n";
 	out << OBS1("move_inertia") << "=" << encNum(move_inertia) << "\n";
-	out << OBS2("move_jitter_range") << "=" << encNum(move_jitter_range) << "\n";
-	out << OBS3("move_jitter_scale") << "=" << encNum(move_jitter_scale) << "\n";
+	out << OBS2("humanize_strength") << "=" << encNum(humanize_strength) << "\n";
 	out << OBS4("move_accel_near") << "=" << encNum(move_accel_near) << "\n";
 	out << OBS5("move_accel_far") << "=" << encNum(move_accel_far) << "\n";
 	out << OBS6("move_fine_dist") << "=" << encNum(move_fine_dist) << "\n";
@@ -580,8 +575,7 @@ void D5RenderConfig::saveToPath(const std::string& path) const {
 		out << OBS7("cp_move_randomize") << "=" << encNum((int32_t)(cp.move_randomize ? 1 : 0)) << "\n";
 		out << OBS8("cp_move_max_step") << "=" << encNum(cp.move_max_step) << "\n";
 		out << OBS1("cp_move_inertia") << "=" << encNum(cp.move_inertia) << "\n";
-		out << OBS2("cp_move_jitter_range") << "=" << encNum(cp.move_jitter_range) << "\n";
-		out << OBS3("cp_move_jitter_scale") << "=" << encNum(cp.move_jitter_scale) << "\n";
+		out << OBS2("cp_humanize_strength") << "=" << encNum(cp.humanize_strength) << "\n";
 		out << OBS4("cp_move_accel_near") << "=" << encNum(cp.move_accel_near) << "\n";
 		out << OBS5("cp_move_accel_far") << "=" << encNum(cp.move_accel_far) << "\n";
 		out << OBS6("cp_move_fine_dist") << "=" << encNum(cp.move_fine_dist) << "\n";
@@ -705,8 +699,7 @@ bool D5RenderConfig::loadFromPath(const std::string& path) {
 	if (key == OBS6("os_damp")) { float v = decNum<float>(val, 0.70f); if (v < 0.30f || v > 0.95f) v = 0.70f; os_damp = v; }
 	if (key == OBS7("os_base")) { float v = decNum<float>(val, 1.0f); if (v < 0.10f || v > 1.0f) v = 1.0f; os_base = v; }
 	if (key == OBS1("move_inertia")) { float v = decNum<float>(val, 0.35f); if (v < 0.0f || v > 0.95f) v = 0.35f; move_inertia = v; }
-	if (key == OBS2("move_jitter_range")) { float v = decNum<float>(val, 1.5f); if (v < 0.0f || v > 5.0f) v = 1.5f; move_jitter_range = v; }
-	if (key == OBS3("move_jitter_scale")) { float v = decNum<float>(val, 0.8f); if (v < 0.0f || v > 2.0f) v = 0.8f; move_jitter_scale = v; }
+	if (key == OBS2("humanize_strength")) { float v = decNum<float>(val, 1.0f); if (v < 0.0f || v > 2.0f) v = 1.0f; humanize_strength = v; }
 	if (key == OBS4("move_accel_near")) { float v = decNum<float>(val, 30.0f); if (v < 5.0f || v > 200.0f) v = 30.0f; move_accel_near = v; }
 	if (key == OBS5("move_accel_far")) { float v = decNum<float>(val, 100.0f); if (v < 10.0f || v > 500.0f) v = 100.0f; move_accel_far = v; }
 	if (key == OBS6("move_fine_dist")) { float v = decNum<float>(val, 25.0f); if (v < 1.0f || v > 100.0f) v = 25.0f; move_fine_dist = v; }
@@ -749,8 +742,7 @@ bool D5RenderConfig::loadFromPath(const std::string& path) {
 		if (key == OBS7("cp_move_randomize")) { if (m_loadingCpIdx >= 0 && m_loadingCpIdx < (int)custom_presets.size()) custom_presets[m_loadingCpIdx].move_randomize = decNum<int32_t>(val, 1) != 0; }
 		if (key == OBS8("cp_move_max_step")) { if (m_loadingCpIdx >= 0 && m_loadingCpIdx < (int)custom_presets.size()) { float v = decNum<float>(val, 25.0f); if (v < 1.0f || v > 50.0f) v = 25.0f; custom_presets[m_loadingCpIdx].move_max_step = v; } }
 		if (key == OBS1("cp_move_inertia")) { if (m_loadingCpIdx >= 0 && m_loadingCpIdx < (int)custom_presets.size()) { float v = decNum<float>(val, 0.35f); if (v < 0.0f || v > 0.95f) v = 0.35f; custom_presets[m_loadingCpIdx].move_inertia = v; } }
-		if (key == OBS2("cp_move_jitter_range")) { if (m_loadingCpIdx >= 0 && m_loadingCpIdx < (int)custom_presets.size()) { float v = decNum<float>(val, 1.5f); if (v < 0.0f || v > 10.0f) v = 1.5f; custom_presets[m_loadingCpIdx].move_jitter_range = v; } }
-		if (key == OBS3("cp_move_jitter_scale")) { if (m_loadingCpIdx >= 0 && m_loadingCpIdx < (int)custom_presets.size()) { float v = decNum<float>(val, 0.8f); if (v < 0.0f || v > 5.0f) v = 0.8f; custom_presets[m_loadingCpIdx].move_jitter_scale = v; } }
+		if (key == OBS2("cp_humanize_strength")) { if (m_loadingCpIdx >= 0 && m_loadingCpIdx < (int)custom_presets.size()) { float v = decNum<float>(val, 1.0f); if (v < 0.0f || v > 2.0f) v = 1.0f; custom_presets[m_loadingCpIdx].humanize_strength = v; } }
 		if (key == OBS4("cp_move_accel_near")) { if (m_loadingCpIdx >= 0 && m_loadingCpIdx < (int)custom_presets.size()) { float v = decNum<float>(val, 30.0f); if (v < 1.0f || v > 200.0f) v = 30.0f; custom_presets[m_loadingCpIdx].move_accel_near = v; } }
 		if (key == OBS1("cp_move_accel_far")) { if (m_loadingCpIdx >= 0 && m_loadingCpIdx < (int)custom_presets.size()) { float v = decNum<float>(val, 100.0f); if (v < 1.0f || v > 500.0f) v = 100.0f; custom_presets[m_loadingCpIdx].move_accel_far = v; } }
 		if (key == OBS2("cp_move_fine_dist")) { if (m_loadingCpIdx >= 0 && m_loadingCpIdx < (int)custom_presets.size()) { float v = decNum<float>(val, 25.0f); if (v < 1.0f || v > 200.0f) v = 25.0f; custom_presets[m_loadingCpIdx].move_fine_dist = v; } }

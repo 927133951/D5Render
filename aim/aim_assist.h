@@ -80,6 +80,7 @@ private:
 	float m_prevErrorY = 0;
 	float m_currentGain = 0.20f;
 	bool m_humanizeEnabled = false;  // [v217] 拟人层开关, 从move_randomize同步
+	float m_humanizeStrength = 1.0f;  // [v235] 拟人抖动强度, update()每帧从config同步(getMoveDelta无config参数)
 	float m_aimFov = 0.5f;
 	int m_lockFrames = 0;
 	float m_smoothH = 0;
